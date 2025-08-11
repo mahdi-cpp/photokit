@@ -120,7 +120,12 @@ func (handler *AssetHandler) UpdateAll(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	allAssets := userStorage.GetAllAssets()
+	allAssets, err := userStorage.GetAllAssets()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	for _, asset := range allAssets {
 		update.AssetIds = append(update.AssetIds, asset.ID)
 	}
@@ -160,8 +165,8 @@ func (handler *AssetHandler) Get(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	asset, exists := userStorage.GetAsset(id)
-	if !exists {
+	asset, err := userStorage.GetAsset(id)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Asset not found"})
 		return
 	}

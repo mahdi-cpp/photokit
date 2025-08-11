@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/api-go-pkg/asset_metadata_manager"
-	"github.com/mahdi-cpp/api-go-pkg/collection"
+	"github.com/mahdi-cpp/api-go-pkg/collection_controll"
 	"github.com/mahdi-cpp/api-go-pkg/image_loader"
 	"github.com/mahdi-cpp/api-go-pkg/network"
 	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/api-go-pkg/thumbnail"
 	"github.com/mahdi-cpp/photokit/config"
 	"github.com/mahdi-cpp/photokit/internal/domain/model"
 	"log"
@@ -95,9 +93,9 @@ func (us *MainStorageManager) GetUserStorage(c *gin.Context, userID int) (*UserS
 
 	// Handler new userStorage for this user
 	userStorage := &UserStorage{
-		user:              *user,
-		metadata:          asset_metadata_manager.NewMetadataManager(config.GetUserPath(user.PhoneNumber, "metadata")),
-		thumbnail:         thumbnail.NewThumbnailManager(config.GetUserPath(user.PhoneNumber, "thumbnails")),
+		user: *user,
+		//metadata:          asset_metadata_manager.NewMetadataManager(config.GetUserPath(user.PhoneNumber, "metadata")),
+		//thumbnail:         thumbnail.NewThumbnailManager(config.GetUserPath(user.PhoneNumber, "thumbnails")),
 		maintenanceCtx:    ctx,
 		cancelMaintenance: cancel,
 	}
@@ -105,37 +103,42 @@ func (us *MainStorageManager) GetUserStorage(c *gin.Context, userID int) (*UserS
 	userStorage.originalImageLoader = image_loader.NewImageLoader(50, config.GetUserPath(user.PhoneNumber, "assets"), 5*time.Minute)
 	userStorage.tinyImageLoader = image_loader.NewImageLoader(30000, config.GetUserPath(user.PhoneNumber, "thumbnails"), 60*time.Minute)
 
-	userStorage.assets, err = userStorage.metadata.LoadUserAllMetadata()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load metadata for user %s: %w", userID, err)
-	}
+	//userStorage.assets, err = userStorage.metadata.LoadUserAllMetadata()
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to load metadata for user %s: %w", userID, err)
+	//}
 
-	userStorage.AlbumManager, err = collection.NewCollectionManager[*model.Album](config.GetUserPath(user.PhoneNumber, "data/albums.json"), false)
-	if err != nil {
-		panic(err)
-	}
-
-	userStorage.SharedAlbumManager, err = collection.NewCollectionManager[*model.SharedAlbum](config.GetUserPath(user.PhoneNumber, "data/shared_albums.json"), false)
+	userStorage.AssetManager, err = collection_controll.NewCollectionManager[*shared_model.PHAsset](config.GetUserPath(user.PhoneNumber, "metadata"), false)
 	if err != nil {
 		panic(err)
 	}
 
-	userStorage.TripManager, err = collection.NewCollectionManager[*model.Trip](config.GetUserPath(user.PhoneNumber, "data/trips.json"), false)
+	userStorage.AlbumManager, err = collection_controll.NewCollectionManager[*model.Album](config.GetUserPath(user.PhoneNumber, "data/albums.json"), false)
 	if err != nil {
 		panic(err)
 	}
 
-	userStorage.PersonManager, err = collection.NewCollectionManager[*model.Person](config.GetUserPath(user.PhoneNumber, "data/persons.json"), false)
+	userStorage.SharedAlbumManager, err = collection_controll.NewCollectionManager[*model.SharedAlbum](config.GetUserPath(user.PhoneNumber, "data/shared_albums.json"), false)
 	if err != nil {
 		panic(err)
 	}
 
-	userStorage.PinnedManager, err = collection.NewCollectionManager[*model.Pinned](config.GetUserPath(user.PhoneNumber, "data/pinned.json"), false)
+	userStorage.TripManager, err = collection_controll.NewCollectionManager[*model.Trip](config.GetUserPath(user.PhoneNumber, "data/trips.json"), false)
 	if err != nil {
 		panic(err)
 	}
 
-	userStorage.VillageManager, err = collection.NewCollectionManager[*model.Village](config.GetPath("/data/villages.json"), false)
+	userStorage.PersonManager, err = collection_controll.NewCollectionManager[*model.Person](config.GetUserPath(user.PhoneNumber, "data/persons.json"), false)
+	if err != nil {
+		panic(err)
+	}
+
+	userStorage.PinnedManager, err = collection_controll.NewCollectionManager[*model.Pinned](config.GetUserPath(user.PhoneNumber, "data/pinned.json"), false)
+	if err != nil {
+		panic(err)
+	}
+
+	userStorage.VillageManager, err = collection_controll.NewCollectionManager[*model.Village](config.GetPath("/data/villages.json"), false)
 	if err != nil {
 		panic(err)
 	}
@@ -169,7 +172,7 @@ func (us *MainStorageManager) loadAllIcons() {
 	//}
 }
 
-func (us *MainStorageManager) GetAssetManager(c *gin.Context, userID int) (*collection.Manager[*model.Person], error) {
+func (us *MainStorageManager) GetAssetManager(c *gin.Context, userID int) (*collection_controll.Manager[*model.Person], error) {
 	userStorage, err := us.GetUserStorage(c, userID)
 	if err != nil {
 		return nil, err

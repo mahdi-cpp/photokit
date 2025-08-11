@@ -3,11 +3,9 @@ package storage
 import (
 	"context"
 	"fmt"
-	"github.com/mahdi-cpp/api-go-pkg/asset_metadata_manager"
-	"github.com/mahdi-cpp/api-go-pkg/collection"
+	"github.com/mahdi-cpp/api-go-pkg/collection_controll"
 	"github.com/mahdi-cpp/api-go-pkg/image_loader"
 	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/api-go-pkg/thumbnail"
 	"github.com/mahdi-cpp/photokit/internal/domain/model"
 	_ "image/jpeg"
 	_ "image/png"
@@ -18,18 +16,21 @@ import (
 )
 
 type UserStorage struct {
-	mu                  sync.RWMutex // Protects all indexes and maps
-	user                shared_model.User
-	assets              map[int]*shared_model.PHAsset
-	cameras             map[string]*shared_model.PHCollection[model.Camera]
-	AlbumManager        *collection.Manager[*model.Album]
-	TripManager         *collection.Manager[*model.Trip]
-	PersonManager       *collection.Manager[*model.Person]
-	PinnedManager       *collection.Manager[*model.Pinned]
-	SharedAlbumManager  *collection.Manager[*model.SharedAlbum]
-	VillageManager      *collection.Manager[*model.Village]
-	metadata            *asset_metadata_manager.AssetMetadataManager
-	thumbnail           *thumbnail.ThumbnailManager
+	mu   sync.RWMutex // Protects all indexes and maps
+	user shared_model.User
+	//assets              map[int]*shared_model.PHAsset
+	//metadata            *asset_metadata_manager.AssetMetadataManager
+
+	AssetManager       *collection_controll.Manager[*shared_model.PHAsset]
+	AlbumManager       *collection_controll.Manager[*model.Album]
+	TripManager        *collection_controll.Manager[*model.Trip]
+	PersonManager      *collection_controll.Manager[*model.Person]
+	PinnedManager      *collection_controll.Manager[*model.Pinned]
+	SharedAlbumManager *collection_controll.Manager[*model.SharedAlbum]
+	VillageManager     *collection_controll.Manager[*model.Village]
+	cameras            map[string]*shared_model.PHCollection[model.Camera]
+
+	//thumbnail           *thumbnail.ThumbnailManager
 	originalImageLoader *image_loader.ImageLoader
 	tinyImageLoader     *image_loader.ImageLoader
 	lastID              int
@@ -39,13 +40,14 @@ type UserStorage struct {
 	statsMu             sync.Mutex
 }
 
-func (userStorage *UserStorage) GetAsset(assetId int) (*shared_model.PHAsset, bool) {
-	asset, exists := userStorage.assets[assetId]
-	return asset, exists
+func (userStorage *UserStorage) GetAsset(assetId int) (*shared_model.PHAsset, error) {
+	//asset, exists := userStorage.assets[assetId]
+	asset, err := userStorage.AssetManager.Get(assetId)
+	return asset, err
 }
 
-func (userStorage *UserStorage) GetAllAssets() map[int]*shared_model.PHAsset {
-	return userStorage.assets
+func (userStorage *UserStorage) GetAllAssets() ([]*shared_model.PHAsset, error) {
+	return userStorage.AssetManager.GetAll()
 }
 
 //func (userStorage *UserStorage) GetAssetContent(id int) ([]byte, error) {
@@ -66,8 +68,8 @@ func (userStorage *UserStorage) UpdateAsset(update shared_model.AssetUpdate) (st
 
 	for _, assetId := range update.AssetIds {
 
-		asset, exists := userStorage.GetAsset(assetId)
-		if !exists {
+		asset, err := userStorage.GetAsset(assetId)
+		if err != nil {
 			continue
 		}
 
@@ -213,10 +215,15 @@ func (userStorage *UserStorage) UpdateAsset(update shared_model.AssetUpdate) (st
 
 		asset.ModificationDate = time.Now()
 
-		// Save updated metadata
-		if err := userStorage.metadata.SaveMetadata(asset); err != nil {
+		_, err = userStorage.AssetManager.Update(asset)
+		if err != nil {
 			return "", err
 		}
+
+		// Save updated metadata
+		//if err := userStorage.metadata.SaveMetadata(asset); err != nil {
+		//	return "", err
+		//}
 
 		//for _, asset := range userStorage.assets {
 		//	if asset.ID == asset.ID {
@@ -266,7 +273,13 @@ func (userStorage *UserStorage) FetchAssets(with shared_model.PHFetchOptions) ([
 	var matches []*shared_model.PHAsset
 	totalCount := 0
 
-	for _, asset := range userStorage.assets {
+	assets, err := userStorage.AssetManager.GetAll()
+	if err != nil {
+		fmt.Printf("Error getting all assets: %v\n", err)
+		return nil, 0, err
+	}
+
+	for _, asset := range assets {
 		if criteria(*asset) {
 			matches = append(matches, asset)
 			totalCount++
@@ -395,7 +408,13 @@ func (userStorage *UserStorage) prepareCameras() {
 		userStorage.cameras = map[string]*shared_model.PHCollection[model.Camera]{}
 	}
 
-	for _, asset := range userStorage.assets {
+	assets, err := userStorage.AssetManager.GetAll()
+	if err != nil {
+		fmt.Printf("Error getting all assets: %v\n", err)
+		return
+	}
+
+	for _, asset := range assets {
 		if asset.CameraModel == "" {
 			continue
 		}
@@ -541,9 +560,13 @@ func (userStorage *UserStorage) DeleteAsset(id int) error {
 	//}
 
 	// Delete metadata
-	if err := userStorage.metadata.DeleteMetadata(id); err != nil {
+	err := userStorage.AssetManager.Delete(id)
+	if err != nil {
 		return fmt.Errorf("failed to delete metadata: %w", err)
 	}
+	//if err := userStorage.metadata.DeleteMetadata(id); err != nil {
+	//	return fmt.Errorf("failed to delete metadata: %w", err)
+	//}
 
 	// Delete thumbnail (if exists)
 	//userStorage.thumbnail.DeleteThumbnails(id)
