@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/photocloud_v2/internal/storage"
+	"github.com/mahdi-cpp/photokit/internal/storage"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,7 +21,6 @@ func NewAssetHandler(userStorageManager *storage.MainStorageManager) *AssetHandl
 }
 
 func (handler *AssetHandler) Create(c *gin.Context) {
-
 }
 
 func (handler *AssetHandler) Upload(c *gin.Context) {

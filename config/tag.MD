@@ -6,7 +6,7 @@ git push origin v1.0.0
 ````
 
 ```
-go get github.com/mahdi-cpp/photocloud_v2
+go get github.com/mahdi-cpp/photokit
 ```
 
 ۱. ریموت هنوز تگ رو Sync نکرده
@@ -23,6 +23,6 @@ go get github.com/mahdi-cpp/photocloud_v2
 اگر کاربر رو مجبور می‌کنید که همیشه از آخرین تگ رسمی استفاده کنه، می‌تونه در go.mod خودش به صورت زیر مشخص کنه:
 ```
 require (
-	github.com/mahdi-cpp/photocloud_v2 v1.0.0
+	github.com/mahdi-cpp/photokit v1.0.0
 )
 ```

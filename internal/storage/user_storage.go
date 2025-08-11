@@ -8,7 +8,7 @@ import (
 	"github.com/mahdi-cpp/api-go-pkg/image_loader"
 	"github.com/mahdi-cpp/api-go-pkg/shared_model"
 	"github.com/mahdi-cpp/api-go-pkg/thumbnail"
-	"github.com/mahdi-cpp/photocloud_v2/internal/domain/model"
+	"github.com/mahdi-cpp/photokit/internal/domain/model"
 	_ "image/jpeg"
 	_ "image/png"
 	"sort"
@@ -20,8 +20,6 @@ import (
 type UserStorage struct {
 	mu                  sync.RWMutex // Protects all indexes and maps
 	user                shared_model.User
-	originalImageLoader *image_loader.ImageLoader
-	tinyImageLoader     *image_loader.ImageLoader
 	assets              map[int]*shared_model.PHAsset
 	cameras             map[string]*shared_model.PHCollection[model.Camera]
 	AlbumManager        *collection.Manager[*model.Album]
@@ -32,6 +30,8 @@ type UserStorage struct {
 	VillageManager      *collection.Manager[*model.Village]
 	metadata            *asset_metadata_manager.AssetMetadataManager
 	thumbnail           *thumbnail.ThumbnailManager
+	originalImageLoader *image_loader.ImageLoader
+	tinyImageLoader     *image_loader.ImageLoader
 	lastID              int
 	lastRebuild         time.Time
 	maintenanceCtx      context.Context

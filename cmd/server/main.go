@@ -1,17 +1,9 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/photocloud_v2/internal/api/handler"
-	"github.com/mahdi-cpp/photocloud_v2/internal/storage"
+	"github.com/mahdi-cpp/photokit/internal/api/handler"
+	"github.com/mahdi-cpp/photokit/internal/storage"
 	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {
@@ -22,137 +14,121 @@ func main() {
 	}
 
 	assetHandler := handler.NewAssetHandler(userStorageManager)
-	searchHandler := handler.NewSearchHandler(userStorageManager)
+	assetRoute(assetHandler)
+
 	albumHandler := handler.NewAlbumHandler(userStorageManager)
+	albumRoute(albumHandler)
+
 	tripHandler := handler.NewTripHandler(userStorageManager)
-	personHandler := handler.NewPersonsHandler(userStorageManager)
-	pinnedHandler := handler.NewPinnedHandler(userStorageManager)
-	cameraHandler := handler.NewCameraHandler(userStorageManager)
+	tripRoute(tripHandler)
+
 	sharedAlbumHandler := handler.NewSharedAlbumHandler(userStorageManager)
+	sharedAlbumRoute(sharedAlbumHandler)
+
+	personHandler := handler.NewPersonsHandler(userStorageManager)
+	personRoute(personHandler)
+
 	villageHandler := handler.NewVillageHandler(userStorageManager)
+	villageRoute(villageHandler)
 
-	// Handler Gin router
-	router := createRouter(
-		assetHandler,
-		albumHandler,
-		villageHandler,
-		sharedAlbumHandler,
-		tripHandler,
-		personHandler,
-		searchHandler,
-		pinnedHandler,
-		cameraHandler)
+	searchHandler := handler.NewSearchHandler(userStorageManager)
+	searchRoute(searchHandler)
 
-	// Start server
+	pinnedHandler := handler.NewPinnedHandler(userStorageManager)
+	pinnedRoute(pinnedHandler)
+
+	cameraHandler := handler.NewCameraHandler(userStorageManager)
+	cameraRoute(cameraHandler)
+
 	startServer(router)
 }
 
-func createRouter(
-	assetHandler *handler.AssetHandler,
-	albumHandler *handler.AlbumHandler,
-	villageHandler *handler.VillageHandler,
-	sharedAlbumHandler *handler.SharedAlbumHandler,
-	tripHandler *handler.TripHandler,
-	personHandler *handler.PersonHandler,
-	searchHandler *handler.SearchHandler,
-	pinnedHandler *handler.PinnedHandler,
-	cameraHandler *handler.CameraHandler,
-) *gin.Engine {
+func assetRoute(assetHandler *handler.AssetHandler) {
 
-	// Set Gin mode
-	gin.SetMode("release")
+	api := router.Group("/api/v1/assets")
 
-	// Handler router with default middleware
-	router := gin.Default()
+	// Asset routes
+	api.POST("create", assetHandler.Create)
+	api.POST("upload", assetHandler.Upload)
+	api.GET("get:id", assetHandler.Get)
+	api.POST("update", assetHandler.Update)
+	api.POST("update_all", assetHandler.UpdateAll)
+	api.POST("delete", assetHandler.Delete)
+	api.POST("filters", assetHandler.Filters)
 
-	// API routes
-	api := router.Group("/api/v1")
-	{
-
-		// Search routes
-		api.GET("/search", searchHandler.Search)
-		api.POST("/search/filters", searchHandler.Filters)
-
-		// Asset routes
-		api.POST("/assets/create", assetHandler.Create)
-		api.POST("/assets", assetHandler.Upload)
-		api.GET("/assets/:id", assetHandler.Get)
-		api.POST("/assets/update", assetHandler.Update)
-		api.POST("/assets/update_all", assetHandler.UpdateAll)
-		api.POST("/assets/delete", assetHandler.Delete)
-		api.POST("/assets/filters", assetHandler.Filters)
-
-		//http://localhost:8080/api/v1/assets/download/thumbnail/map_270.jpg
-		api.GET("/assets/download/:filename", assetHandler.OriginalDownload)
-		api.GET("/assets/download/thumbnail/:filename", assetHandler.TinyImageDownload)
-		api.GET("/assets/download/icons/:filename", assetHandler.IconDownload)
-
-		api.POST("/village/list", villageHandler.GetList)
-
-		api.POST("/album/create", albumHandler.Create)
-		api.POST("/album/update", albumHandler.Update)
-		api.POST("/album/delete", albumHandler.Delete)
-		api.POST("/album/list", albumHandler.GetListV2)
-
-		api.POST("/shared_album/create", sharedAlbumHandler.Create)
-		api.POST("/shared_album/update", sharedAlbumHandler.Update)
-		api.POST("/shared_album/delete", sharedAlbumHandler.Delete)
-		api.POST("/shared_album/list", sharedAlbumHandler.GetList)
-
-		api.POST("/trip/create", tripHandler.Create)
-		api.POST("/trip/update", tripHandler.Update)
-		api.POST("/trip/delete", tripHandler.Delete)
-		api.POST("/trip/list", tripHandler.GetCollectionList)
-
-		api.POST("/person/create", personHandler.Create)
-		api.POST("/person/update", personHandler.Update)
-		api.POST("/person/delete", personHandler.Delete)
-		api.POST("/person/list", personHandler.GetCollectionList)
-
-		api.POST("/pinned/create", pinnedHandler.Create)
-		api.POST("/pinned/update", pinnedHandler.Update)
-		api.POST("/pinned/delete", pinnedHandler.Delete)
-		api.POST("/pinned/list", pinnedHandler.GetList)
-
-		api.POST("/camera/list", cameraHandler.GetList)
-	}
-
-	// Health check endpoint
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
-
-	return router
+	//http://localhost:8080/api/v1/assets/download/thumbnail/map_270.jpg
+	api.GET("download/:filename", assetHandler.OriginalDownload)
+	api.GET("download/thumbnail/:filename", assetHandler.TinyImageDownload)
+	api.GET("download/icons/:filename", assetHandler.IconDownload)
 }
 
-func startServer(router *gin.Engine) {
+func albumRoute(albumHandler *handler.AlbumHandler) {
 
-	// Handler HTTP server
-	srv := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", "0.0.0.0", 8081),
-		Handler: router,
-	}
+	api := router.Group("/api/v1/album")
 
-	// Run server in a goroutine
-	go func() {
-		log.Printf("Server starting on %s", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed: %v", err)
-		}
-	}()
+	api.POST("create", albumHandler.Create)
+	api.POST("update", albumHandler.Update)
+	api.POST("delete", albumHandler.Delete)
+	api.POST("list", albumHandler.GetListV2)
+}
 
-	// Graceful shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutting down server...")
+func pinnedRoute(pinnedHandler *handler.PinnedHandler) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	api := router.Group("/api/v1/pinned")
 
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
-	}
+	api.POST("create", pinnedHandler.Create)
+	api.POST("update", pinnedHandler.Update)
+	api.POST("delete", pinnedHandler.Delete)
+	api.POST("list", pinnedHandler.GetList)
+}
 
-	log.Println("Server exited")
+func sharedAlbumRoute(sharedAlbumHandler *handler.SharedAlbumHandler) {
+
+	api := router.Group("/api/v1/shared_album")
+
+	api.POST("create", sharedAlbumHandler.Create)
+	api.POST("update", sharedAlbumHandler.Update)
+	api.POST("delete", sharedAlbumHandler.Delete)
+	api.POST("list", sharedAlbumHandler.GetList)
+}
+
+func tripRoute(tripHandler *handler.TripHandler) {
+
+	api := router.Group("/api/v1/trip")
+
+	api.POST("create", tripHandler.Create)
+	api.POST("update", tripHandler.Update)
+	api.POST("delete", tripHandler.Delete)
+	api.POST("list", tripHandler.GetCollectionList)
+}
+
+func personRoute(personHandler *handler.PersonHandler) {
+
+	api := router.Group("/api/v1/person")
+
+	api.POST("create", personHandler.Create)
+	api.POST("update", personHandler.Update)
+	api.POST("delete", personHandler.Delete)
+	api.POST("list", personHandler.GetCollectionList)
+}
+
+func cameraRoute(cameraHandler *handler.CameraHandler) {
+
+	api := router.Group("/api/v1/camera")
+
+	api.POST("/list", cameraHandler.GetList)
+}
+
+func searchRoute(searchHandler *handler.SearchHandler) {
+	api := router.Group("/api/v1/search")
+
+	api.GET("/", searchHandler.Search)
+	api.POST("/filters", searchHandler.Filters)
+}
+
+func villageRoute(villageHandler *handler.VillageHandler) {
+
+	api := router.Group("/api/v1/village")
+
+	api.POST("list", villageHandler.GetList)
 }
