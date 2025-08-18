@@ -2,57 +2,62 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/photokit/internal/domain/model"
-	"github.com/mahdi-cpp/photokit/internal/storage"
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/application"
+	collection "github.com/mahdi-cpp/photokit/internal/collections"
+	"github.com/mahdi-cpp/photokit/internal/collections/person"
+	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"net/http"
 )
 
 type PersonHandler struct {
-	userStorageManager *storage.MainStorageManager
+	manager *application.AppManager
 }
 
-func NewPersonsHandler(userStorageManager *storage.MainStorageManager) *PersonHandler {
+func NewPersonsHandler(manager *application.AppManager) *PersonHandler {
 	return &PersonHandler{
-		userStorageManager: userStorageManager,
+		manager: manager,
 	}
 }
 
 func (handler *PersonHandler) Create(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var request shared_model.CollectionRequest
+	var request collection.CollectionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	newItem, err := userStorage.PersonManager.Create(&model.Person{Title: request.Title})
+	newItem, err := userManager.GetCollections().Persons.Collection.Create(&person.Person{Title: request.Title})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	update := shared_model.AssetUpdate{AssetIds: request.AssetIds, AddPersons: []int{newItem.ID}}
-	_, err = userStorage.UpdateAsset(update)
+	updateOptions := phasset.UpdateOptions{
+		AssetIds:   request.AssetIds,
+		AddPersons: []string{newItem.ID},
+	}
+	_, err = userManager.UpdateAssets(updateOptions)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userStorage.UpdateCollections()
+	userManager.UpdateCollections()
 
-	c.JSON(http.StatusCreated, shared_model.CollectionResponse{
+	c.JSON(http.StatusCreated, CollectionResponse{
 		ID:    newItem.ID,
 		Title: newItem.Title,
 	})
@@ -60,31 +65,31 @@ func (handler *PersonHandler) Create(c *gin.Context) {
 
 func (handler *PersonHandler) Update(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var itemHandler model.PersonHandler
-	if err := c.ShouldBindJSON(&itemHandler); err != nil {
+	var updateOptions person.UpdateOptions
+	if err := c.ShouldBindJSON(&updateOptions); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	item, err := userStorage.PersonManager.Get(itemHandler.ID)
+	item, err := userManager.GetCollections().Persons.Collection.Get(updateOptions.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	model.UpdatePerson(item, itemHandler)
+	person.Update(item, updateOptions)
 
-	item2, err := userStorage.PersonManager.Update(item)
+	item2, err := userManager.GetCollections().Persons.Collection.Update(item)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -95,24 +100,24 @@ func (handler *PersonHandler) Update(c *gin.Context) {
 
 func (handler *PersonHandler) Delete(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var item model.Person
+	var item person.Person
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	err = userStorage.PersonManager.Delete(item.ID)
+	err = userManager.GetCollections().Persons.Collection.Delete(item.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -122,30 +127,30 @@ func (handler *PersonHandler) Delete(c *gin.Context) {
 }
 
 func (handler *PersonHandler) GetCollectionList(c *gin.Context) {
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	items, err := userStorage.PersonManager.GetAllSorted("creationDate", "1asc")
+	items, err := userManager.GetCollections().Persons.Collection.GetAllSorted("creationDate", "1asc")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	result := shared_model.PHCollectionList[*model.Person]{
-		Collections: make([]*shared_model.PHCollection[*model.Person], len(items)),
+	result := collection.PHCollectionList[*person.Person]{
+		Collections: make([]*collection.PHCollection[*person.Person], len(items)),
 	}
 
 	for i, item := range items {
-		assets, _ := userStorage.PersonManager.GetItemAssets(item.ID)
-		result.Collections[i] = &shared_model.PHCollection[*model.Person]{
+		assets, _ := userManager.GetCollections().Persons.PhotoAssetList[item.ID]
+		result.Collections[i] = &collection.PHCollection[*person.Person]{
 			Item:   item,
 			Assets: assets,
 		}
@@ -156,19 +161,19 @@ func (handler *PersonHandler) GetCollectionList(c *gin.Context) {
 
 func (handler *PersonHandler) GetCollectionListWith(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
 	// Get only visible items
-	items, err := userStorage.PersonManager.GetList(func(a *model.Person) bool {
+	items, err := userManager.GetCollections().Persons.Collection.GetList(func(a *person.Person) bool {
 		return !a.IsCollection
 	})
 	if err != nil {

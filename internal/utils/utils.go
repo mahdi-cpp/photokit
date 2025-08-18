@@ -1,8 +1,8 @@
 package utils
 
-import "os"
-
-// utils-------------------------------------
+import (
+	"os"
+)
 
 func GetFileSize(filepath string) (int64, error) {
 	fileInfo, err := os.Stat(filepath)
@@ -10,4 +10,8 @@ func GetFileSize(filepath string) (int64, error) {
 		return 0, err
 	}
 	return fileInfo.Size(), nil
+}
+
+func GetBoolPointer(b bool) *bool {
+	return &b
 }

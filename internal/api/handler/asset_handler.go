@@ -2,22 +2,22 @@ package handler
 
 import (
 	"fmt"
-	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/photokit/internal/storage"
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/application"
+	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AssetHandler struct {
-	userStorageManager *storage.MainStorageManager
+	manager *application.AppManager
 }
 
-func NewAssetHandler(userStorageManager *storage.MainStorageManager) *AssetHandler {
-	return &AssetHandler{userStorageManager: userStorageManager}
+func NewAssetHandler(manager *application.AppManager) *AssetHandler {
+	return &AssetHandler{manager: manager}
 }
 
 func (handler *AssetHandler) Create(c *gin.Context) {
@@ -25,7 +25,7 @@ func (handler *AssetHandler) Create(c *gin.Context) {
 
 func (handler *AssetHandler) Upload(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
@@ -38,24 +38,24 @@ func (handler *AssetHandler) Upload(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Handler asset metadata
-	asset := &shared_model.PHAsset{
+	// Handler build_asset metadata
+	asset := &phasset.PHAsset{
 		UserID:   userID,
-		Filename: header.Filename,
+		FileName: header.Filename,
 	}
 
-	//userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	//userManager, err := handler.manager.GetUserManager(c, userID)
 	//if err != nil {
 	//	c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	//}
 
-	//asset, err = userStorage.UploadAsset(asset.UserID, file, header)
+	//build_asset, err = userManager.UploadAsset(build_asset.UserID, file, header)
 	//if err != nil {
 	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Processing failed"})
 	//	return
 	//}
 
-	//asset, err := handler.userStorageManager.Upload(c, userID, file, header)
+	//build_asset, err := handler.manager.Upload(c, userID, file, header)
 	//if err != nil {
 	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Processing failed"})
 	//	return
@@ -68,34 +68,34 @@ func (handler *AssetHandler) Update(c *gin.Context) {
 
 	startTime := time.Now()
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var update shared_model.AssetUpdate
-	if err := c.ShouldBindJSON(&update); err != nil {
+	var updateOptions phasset.UpdateOptions
+	if err := c.ShouldBindJSON(&updateOptions); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	asset, err := userStorage.UpdateAsset(update)
+	asset, err := userManager.UpdateAssets(updateOptions)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userStorage.UpdateCollections()
+	userManager.UpdateCollections()
 
 	// Log performance
 	duration := time.Since(startTime)
-	log.Printf("Update: assets count: %d,  (in %v)", len(update.AssetIds), duration)
+	log.Printf("Update: build_asset count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
 
 	c.JSON(http.StatusCreated, asset)
 }
@@ -103,69 +103,70 @@ func (handler *AssetHandler) Update(c *gin.Context) {
 func (handler *AssetHandler) UpdateAll(c *gin.Context) {
 	startTime := time.Now()
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var update shared_model.AssetUpdate
-	if err := c.ShouldBindJSON(&update); err != nil {
+	var updateOptions phasset.UpdateOptions
+	if err := c.ShouldBindJSON(&updateOptions); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	allAssets, err := userStorage.GetAllAssets()
+	allAssets, err := userManager.GetAllAssets()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	for _, asset := range allAssets {
-		update.AssetIds = append(update.AssetIds, asset.ID)
+		updateOptions.AssetIds = append(updateOptions.AssetIds, asset.ID)
 	}
 
-	asset, err := userStorage.UpdateAsset(update)
+	asset, err := userManager.UpdateAssets(updateOptions)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userStorage.UpdateCollections()
+	userManager.UpdateCollections()
 
 	// Log performance
 	duration := time.Since(startTime)
-	log.Printf("Update: assets count: %d,  (in %v)", len(update.AssetIds), duration)
+	log.Printf("Update: build_asset count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
 
 	c.JSON(http.StatusCreated, asset)
 }
 
 func (handler *AssetHandler) Get(c *gin.Context) {
 
-	userIDStr := c.Query("userID")
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
-		return
-	}
+	userID := c.Query("userID")
+	//userID, err := strconv.Atoi(userID)
+	//if err != nil {
+	//	c.JSON(400, gin.H{"error": "userID must be an integer"})
+	//	return
+	//}
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
-		return
-	}
+	//id := c.Param("id")
+	//id, err := strconv.Atoi(c.Param("id"))
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+	//	return
+	//}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	asset, err := userStorage.GetAsset(id)
+	asset, err := userManager.GetCollections().Assets.Get(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Asset not found"})
 		return
@@ -176,7 +177,7 @@ func (handler *AssetHandler) Get(c *gin.Context) {
 
 func (handler *AssetHandler) Search(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
@@ -197,70 +198,70 @@ func (handler *AssetHandler) Search(c *gin.Context) {
 		}
 	}
 
-	filters := shared_model.PHFetchOptions{
+	filters := phasset.SearchOptions{
 		UserID:    userID,
-		Query:     query,
-		MediaType: shared_model.MediaType(mediaType),
+		TextQuery: query,
+		MediaType: phasset.MediaType(mediaType),
 	}
 
 	if len(dateRange) > 0 {
-		filters.StartDate = &dateRange[0]
+		filters.CreatedAfter = &dateRange[0]
 	}
 	if len(dateRange) > 1 {
-		filters.EndDate = &dateRange[1]
+		filters.CreatedBefore = &dateRange[1]
 	}
 
-	//assets, _, err := s.repo.Search(ctx, filters)
-	//return assets, err
+	//build_asset, _, err := s.repo.Search(ctx, filters)
+	//return build_asset, err
 
-	//assets, _, err := handler.userStorageManager.Search(c, filters)
+	//build_asset, _, err := handler.manager.Search(c, filters)
 	//if err != nil {
 	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Search failed"})
 	//	return
 	//}
 
-	//c.JSON(http.StatusOK, assets)
+	//c.JSON(http.StatusOK, build_asset)
 }
 
 func (handler *AssetHandler) Delete(c *gin.Context) {
 
-	userIDStr := c.Query("userID")
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
-		return
-	}
+	//userID := c.Query("userID")
+	//userID, err := strconv.Atoi(userID)
+	//if err != nil {
+	//	c.JSON(400, gin.H{"error": "userID must be an integer"})
+	//	return
+	//}
 
-	var request shared_model.AssetDelete
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
-	}
-
-	err = userStorage.DeleteAsset(request.AssetID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, "successful delete asset with id: "+strconv.Itoa(request.AssetID))
+	//var request phasset.Delete
+	//if err := c.ShouldBindJSON(&request); err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	//	return
+	//}
+	//
+	//userManager, err := handler.manager.GetUserManager(c, userID)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	//}
+	//
+	//err = userManager.DeleteAsset(request.AssetID)
+	//if err != nil {
+	//	c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//
+	//c.JSON(http.StatusOK, "successful delete build_asset with id: "+request.AssetID)
 }
 
 func (handler *AssetHandler) Filters(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var with shared_model.PHFetchOptions
+	var with *phasset.SearchOptions
 	if err := c.ShouldBindJSON(&with); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		fmt.Println("Invalid request")
@@ -268,103 +269,24 @@ func (handler *AssetHandler) Filters(c *gin.Context) {
 	}
 
 	fmt.Println("userID: ", userID)
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	items, total, err := userStorage.FetchAssets(with)
+	items, err := userManager.FetchAssets(with)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed user FetchAssets"})
 		return
 	}
 
-	fmt.Println("Filters count: ", len(items))
-
-	result := shared_model.PHFetchResult[*shared_model.PHAsset]{
-		Items:  items,
-		Total:  total,
-		Limit:  100,
-		Offset: 100,
-	}
-
-	c.JSON(http.StatusOK, result)
-}
-
-//----------------------------------------
-
-func (handler *AssetHandler) OriginalDownload(c *gin.Context) {
-
-	userID, err := getUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
-		return
-	}
-
-	filename := c.Param("filename")
-	//filepath2 := filepath.Join("/mahdi_abdolmaleki/assets", filename)
-
-	//fileSize, err := storage_v1.GetFileSize(config.GetPath(filepath2))
-	//if err != nil {
-	//	c.AbortWithStatusJSON(500, gin.H{"error": "Failed to get file size"})
-	//	return
+	//result := asset.PHFetchResult[*phasset.PHAsset]{
+	//	Items:  items,
+	//	Total:  total,
+	//	Limit:  100,
+	//	Offset: 100,
 	//}
 
-	//filepathTiny := filepath.Join("mahdi_abdolmaleki/assets", filename)
-
-	imgData, err := handler.userStorageManager.RepositoryGetOriginalImage(userID, filename)
-	if err != nil {
-		c.AbortWithStatusJSON(404, gin.H{"error": "File not found"})
-	} else {
-		c.Data(http.StatusOK, "image/jpeg", imgData)
-	}
-
-	//c.Header("Content-Type", "mage/jpeg")
-	//c.Header("Content-Encoding", "identity") // Disable compression
-	//c.Next()
-	//c.Header("Content-Length", fmt.Sprintf("%d", fileSize))
-
-	//c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-	//c.Header("Accept-Ranges", "bytes")
-	//c.File(filepath2)
-}
-
-func (handler *AssetHandler) TinyImageDownload(c *gin.Context) {
-
-	userID, err := getUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
-		return
-	}
-
-	filename := c.Param("filename")
-	//if strings.Contains(filename, "png") {
-	//	imgData, err := handler.userStorageManager.RepositoryGetIcon(filename)
-	//	if err != nil {
-	//		fmt.Println("icon read error: ", err.Error())
-	//	} else {
-	//		c.Data(http.StatusOK, "image/png", imgData) // Adjust MIME type as necessary
-	//	}
-	//	return
-	//}
-
-	//filepathTiny := filepath.Join("mahdi_abdolmaleki/thumbnails", filename)
-
-	imgData, err := handler.userStorageManager.RepositoryGetTinyImage(userID, filename)
-	if err != nil {
-		c.AbortWithStatusJSON(404, gin.H{"error": "File not found"})
-	} else {
-		c.Data(http.StatusOK, "image/jpeg", imgData)
-	}
-}
-
-func (handler *AssetHandler) IconDownload(c *gin.Context) {
-	filename := c.Param("filename")
-	imgData, err := handler.userStorageManager.RepositoryGetIcon(filename)
-	if err != nil {
-		c.AbortWithStatusJSON(404, gin.H{"error": "File not found"})
-		return
-	}
-
-	c.Data(http.StatusOK, "image/png", imgData)
+	c.JSON(http.StatusOK, items)
 }

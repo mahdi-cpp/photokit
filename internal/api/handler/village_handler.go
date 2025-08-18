@@ -3,36 +3,37 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/photokit/internal/domain/model"
-	"github.com/mahdi-cpp/photokit/internal/storage"
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/application"
+	asset "github.com/mahdi-cpp/photokit/internal/collections"
+	"github.com/mahdi-cpp/photokit/internal/collections/village"
 	"net/http"
 )
 
 type VillageHandler struct {
-	userStorageManager *storage.MainStorageManager
+	manager *application.AppManager
 }
 
-func NewVillageHandler(userStorageManager *storage.MainStorageManager) *VillageHandler {
+func NewVillageHandler(manager *application.AppManager) *VillageHandler {
 	return &VillageHandler{
-		userStorageManager: userStorageManager,
+		manager: manager,
 	}
 }
 
 func (handler *VillageHandler) GetList(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userStorage, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	items, err := userStorage.VillageManager.GetAll()
+	items, err := userStorage.GetCollections().Villages.Collection.GetAll()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -40,12 +41,12 @@ func (handler *VillageHandler) GetList(c *gin.Context) {
 
 	fmt.Println("villages: ", len(items))
 
-	result := shared_model.PHCollectionList[*model.Village]{
-		Collections: make([]*shared_model.PHCollection[*model.Village], len(items)),
+	result := asset.PHCollectionList[*village.Village]{
+		Collections: make([]*asset.PHCollection[*village.Village], len(items)),
 	}
 
 	for i, item := range items {
-		result.Collections[i] = &shared_model.PHCollection[*model.Village]{
+		result.Collections[i] = &asset.PHCollection[*village.Village]{
 			Item: item,
 		}
 	}

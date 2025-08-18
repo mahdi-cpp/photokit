@@ -2,16 +2,18 @@ package main
 
 import (
 	"github.com/mahdi-cpp/photokit/internal/api/handler"
-	"github.com/mahdi-cpp/photokit/internal/storage"
+	"github.com/mahdi-cpp/photokit/internal/application"
 	"log"
 )
 
 func main() {
 
-	userStorageManager, err := storage.NewMainStorageManager()
+	userStorageManager, err := application.NewApplicationManager()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ginInit()
 
 	assetHandler := handler.NewAssetHandler(userStorageManager)
 	assetRoute(assetHandler)
@@ -31,9 +33,6 @@ func main() {
 	villageHandler := handler.NewVillageHandler(userStorageManager)
 	villageRoute(villageHandler)
 
-	searchHandler := handler.NewSearchHandler(userStorageManager)
-	searchRoute(searchHandler)
-
 	pinnedHandler := handler.NewPinnedHandler(userStorageManager)
 	pinnedRoute(pinnedHandler)
 
@@ -43,92 +42,79 @@ func main() {
 	startServer(router)
 }
 
-func assetRoute(assetHandler *handler.AssetHandler) {
+func assetRoute(h *handler.AssetHandler) {
 
 	api := router.Group("/api/v1/assets")
 
-	// Asset routes
-	api.POST("create", assetHandler.Create)
-	api.POST("upload", assetHandler.Upload)
-	api.GET("get:id", assetHandler.Get)
-	api.POST("update", assetHandler.Update)
-	api.POST("update_all", assetHandler.UpdateAll)
-	api.POST("delete", assetHandler.Delete)
-	api.POST("filters", assetHandler.Filters)
-
-	//http://localhost:8080/api/v1/assets/download/thumbnail/map_270.jpg
-	api.GET("download/:filename", assetHandler.OriginalDownload)
-	api.GET("download/thumbnail/:filename", assetHandler.TinyImageDownload)
-	api.GET("download/icons/:filename", assetHandler.IconDownload)
+	api.POST("create", h.Create)
+	api.POST("upload", h.Upload)
+	api.GET("get:id", h.Get)
+	api.POST("update", h.Update)
+	api.POST("update_all", h.UpdateAll)
+	api.POST("delete", h.Delete)
+	api.POST("filters", h.Filters)
 }
 
-func albumRoute(albumHandler *handler.AlbumHandler) {
+func albumRoute(h *handler.AlbumHandler) {
 
 	api := router.Group("/api/v1/album")
 
-	api.POST("create", albumHandler.Create)
-	api.POST("update", albumHandler.Update)
-	api.POST("delete", albumHandler.Delete)
-	api.POST("list", albumHandler.GetListV2)
+	api.POST("create", h.Create)
+	api.POST("update", h.Update)
+	api.POST("delete", h.Delete)
+	api.POST("list", h.GetListV2)
 }
 
-func pinnedRoute(pinnedHandler *handler.PinnedHandler) {
+func pinnedRoute(h *handler.PinnedHandler) {
 
 	api := router.Group("/api/v1/pinned")
 
-	api.POST("create", pinnedHandler.Create)
-	api.POST("update", pinnedHandler.Update)
-	api.POST("delete", pinnedHandler.Delete)
-	api.POST("list", pinnedHandler.GetList)
+	api.POST("create", h.Create)
+	api.POST("update", h.Update)
+	api.POST("delete", h.Delete)
+	api.POST("list", h.GetList)
 }
 
-func sharedAlbumRoute(sharedAlbumHandler *handler.SharedAlbumHandler) {
+func sharedAlbumRoute(h *handler.SharedAlbumHandler) {
 
 	api := router.Group("/api/v1/shared_album")
 
-	api.POST("create", sharedAlbumHandler.Create)
-	api.POST("update", sharedAlbumHandler.Update)
-	api.POST("delete", sharedAlbumHandler.Delete)
-	api.POST("list", sharedAlbumHandler.GetList)
+	api.POST("create", h.Create)
+	api.POST("update", h.Update)
+	api.POST("delete", h.Delete)
+	api.POST("list", h.GetList)
 }
 
-func tripRoute(tripHandler *handler.TripHandler) {
+func tripRoute(h *handler.TripHandler) {
 
 	api := router.Group("/api/v1/trip")
 
-	api.POST("create", tripHandler.Create)
-	api.POST("update", tripHandler.Update)
-	api.POST("delete", tripHandler.Delete)
-	api.POST("list", tripHandler.GetCollectionList)
+	api.POST("create", h.Create)
+	api.POST("update", h.Update)
+	api.POST("delete", h.Delete)
+	api.POST("list", h.GetCollectionList)
 }
 
-func personRoute(personHandler *handler.PersonHandler) {
+func personRoute(h *handler.PersonHandler) {
 
 	api := router.Group("/api/v1/person")
 
-	api.POST("create", personHandler.Create)
-	api.POST("update", personHandler.Update)
-	api.POST("delete", personHandler.Delete)
-	api.POST("list", personHandler.GetCollectionList)
+	api.POST("create", h.Create)
+	api.POST("update", h.Update)
+	api.POST("delete", h.Delete)
+	api.POST("list", h.GetCollectionList)
 }
 
-func cameraRoute(cameraHandler *handler.CameraHandler) {
+func cameraRoute(h *handler.CameraHandler) {
 
 	api := router.Group("/api/v1/camera")
 
-	api.POST("/list", cameraHandler.GetList)
+	api.POST("/list", h.GetList)
 }
 
-func searchRoute(searchHandler *handler.SearchHandler) {
-	api := router.Group("/api/v1/search")
-
-	api.GET("/", searchHandler.Search)
-	api.POST("/filters", searchHandler.Filters)
-}
-
-func villageRoute(villageHandler *handler.VillageHandler) {
+func villageRoute(h *handler.VillageHandler) {
 
 	api := router.Group("/api/v1/village")
 
-	api.POST("list", villageHandler.GetList)
+	api.POST("list", h.GetList)
 }

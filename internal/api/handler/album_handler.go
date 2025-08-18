@@ -1,91 +1,99 @@
 package handler
 
+import "C"
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/photokit/internal/domain/model"
-	"github.com/mahdi-cpp/photokit/internal/storage"
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/application"
+	collection "github.com/mahdi-cpp/photokit/internal/collections"
+	"github.com/mahdi-cpp/photokit/internal/collections/album"
+	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"net/http"
 )
 
 type AlbumHandler struct {
-	userStorageManager *storage.MainStorageManager
+	manager *application.AppManager
 }
 
-func NewAlbumHandler(userStorageManager *storage.MainStorageManager) *AlbumHandler {
+func NewAlbumHandler(manager *application.AppManager) *AlbumHandler {
 	return &AlbumHandler{
-		userStorageManager: userStorageManager,
+		manager: manager,
 	}
 }
 
 func (handler *AlbumHandler) Create(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var request shared_model.CollectionRequest
+	var request collection.CollectionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	newItem, err := userStorage.AlbumManager.Create(&model.Album{Title: request.Title})
+	newItem, err := userManager.GetCollections().Album.Collection.Create(&album.Album{Title: request.Title})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	update := shared_model.AssetUpdate{AssetIds: request.AssetIds, AddAlbums: []int{newItem.ID}}
-	_, err = userStorage.UpdateAsset(update)
+	update := phasset.UpdateOptions{AssetIds: request.AssetIds, AddAlbums: []string{newItem.ID}}
+	_, err = userManager.UpdateAssets(update)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userStorage.UpdateCollections()
+	userManager.UpdateCollections()
 
-	c.JSON(http.StatusCreated, shared_model.CollectionResponse{
+	c.JSON(http.StatusCreated, CollectionResponse{
 		ID:    newItem.ID,
 		Title: newItem.Title,
 	})
 }
 
+type CollectionResponse struct {
+	ID    string `json:"id"`
+	Title string `json:"name"`
+}
+
 func (handler *AlbumHandler) Update(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var itemHandler model.AlbumHandler
-	if err := c.ShouldBindJSON(&itemHandler); err != nil {
+	var updateOptions album.UpdateOptions
+	if err := c.ShouldBindJSON(&updateOptions); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	item, err := userStorage.AlbumManager.Get(itemHandler.ID)
+	item, err := userManager.GetCollections().Album.Collection.Get(updateOptions.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	model.UpdateAlbum(item, itemHandler)
+	album.Update(item, updateOptions)
 
-	item2, err := userStorage.AlbumManager.Update(item)
+	item2, err := userManager.GetCollections().Album.Collection.Update(item)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -96,24 +104,24 @@ func (handler *AlbumHandler) Update(c *gin.Context) {
 
 func (handler *AlbumHandler) Delete(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var item model.Album
+	var item album.Album
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	err = userStorage.AlbumManager.Delete(item.ID)
+	err = userManager.GetCollections().Album.Collection.Delete(item.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -124,18 +132,18 @@ func (handler *AlbumHandler) Delete(c *gin.Context) {
 
 func (handler *AlbumHandler) GetCollectionList(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	item2, err := userStorage.AlbumManager.GetAll()
+	item2, err := userManager.GetCollections().Album.Collection.GetAll()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -146,37 +154,39 @@ func (handler *AlbumHandler) GetCollectionList(c *gin.Context) {
 
 func (handler *AlbumHandler) GetListV2(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var with shared_model.PHFetchOptions
-	if err := c.ShouldBindJSON(&with); err != nil {
+	var searchOptions album.SearchOptions
+	if err := c.ShouldBindJSON(&searchOptions); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		fmt.Println("Invalid request")
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	items, err := userStorage.AlbumManager.GetAllSorted(with.SortBy, with.SortOrder)
+	items, err := userManager.GetCollections().Album.Collection.GetAll()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	result := shared_model.PHCollectionList[*model.Album]{
-		Collections: make([]*shared_model.PHCollection[*model.Album], len(items)),
+	albums := album.Search(items, searchOptions)
+
+	result := collection.PHCollectionList[*album.Album]{
+		Collections: make([]*collection.PHCollection[*album.Album], len(albums)),
 	}
 
 	for i, item := range items {
-		assets, _ := userStorage.AlbumManager.GetItemAssets(item.ID)
-		result.Collections[i] = &shared_model.PHCollection[*model.Album]{
+		assets, _ := userManager.GetCollections().Album.PhotoAssetList[item.ID]
+		result.Collections[i] = &collection.PHCollection[*album.Album]{
 			Item:   item,
 			Assets: assets,
 		}

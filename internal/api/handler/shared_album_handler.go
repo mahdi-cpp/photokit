@@ -2,42 +2,43 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/api-go-pkg/shared_model"
-	"github.com/mahdi-cpp/photokit/internal/domain/model"
-	"github.com/mahdi-cpp/photokit/internal/storage"
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/application"
+	collection "github.com/mahdi-cpp/photokit/internal/collections"
+	"github.com/mahdi-cpp/photokit/internal/collections/shared_album"
 	"net/http"
 )
 
 type SharedAlbumHandler struct {
-	userStorageManager *storage.MainStorageManager
+	manager *application.AppManager
 }
 
-func NewSharedAlbumHandler(userStorageManager *storage.MainStorageManager) *SharedAlbumHandler {
+func NewSharedAlbumHandler(manager *application.AppManager) *SharedAlbumHandler {
 	return &SharedAlbumHandler{
-		userStorageManager: userStorageManager,
+		manager: manager,
 	}
 }
 
 func (handler *SharedAlbumHandler) Create(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var item model.SharedAlbum
+	var item shared_album.SharedAlbum
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	item2, err := userStorage.SharedAlbumManager.Create(&item)
+	item2, err := userManager.GetCollections().SharedAlbums.Collection.Create(&item)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -48,31 +49,31 @@ func (handler *SharedAlbumHandler) Create(c *gin.Context) {
 
 func (handler *SharedAlbumHandler) Update(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var itemHandler model.SharedAlbumHandler
-	if err := c.ShouldBindJSON(&itemHandler); err != nil {
+	var updateOptions shared_album.UpdateOptions
+	if err := c.ShouldBindJSON(&updateOptions); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	item, err := userStorage.SharedAlbumManager.Get(itemHandler.ID)
+	item, err := userManager.GetCollections().SharedAlbums.Collection.Get(updateOptions.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	model.UpdateSharedAlbum(item, itemHandler)
+	shared_album.Update(item, updateOptions)
 
-	item2, err := userStorage.SharedAlbumManager.Update(item)
+	item2, err := userManager.GetCollections().SharedAlbums.Collection.Update(item)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -83,24 +84,24 @@ func (handler *SharedAlbumHandler) Update(c *gin.Context) {
 
 func (handler *SharedAlbumHandler) Delete(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	var item model.SharedAlbum
+	var item shared_album.SharedAlbum
 	if err := c.ShouldBindJSON(&item); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	err = userStorage.SharedAlbumManager.Delete(item.ID)
+	err = userManager.GetCollections().SharedAlbums.Collection.Delete(item.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
@@ -111,30 +112,30 @@ func (handler *SharedAlbumHandler) Delete(c *gin.Context) {
 
 func (handler *SharedAlbumHandler) GetList(c *gin.Context) {
 
-	userID, err := getUserId(c)
+	userID, err := account.GetUserId(c)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "userID must be an integer"})
 		return
 	}
 
-	userStorage, err := handler.userStorageManager.GetUserStorage(c, userID)
+	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	items, err := userStorage.SharedAlbumManager.GetAll()
+	items, err := userManager.GetCollections().SharedAlbums.Collection.GetAll()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	result := shared_model.PHCollectionList[*model.SharedAlbum]{
-		Collections: make([]*shared_model.PHCollection[*model.SharedAlbum], len(items)),
+	result := collection.PHCollectionList[*shared_album.SharedAlbum]{
+		Collections: make([]*collection.PHCollection[*shared_album.SharedAlbum], len(items)),
 	}
 
 	for i, item := range items {
-		assets, _ := userStorage.SharedAlbumManager.GetItemAssets(item.ID)
-		result.Collections[i] = &shared_model.PHCollection[*model.SharedAlbum]{
+		assets, _ := userManager.GetCollections().SharedAlbums.PhotoAssetList[item.ID]
+		result.Collections[i] = &collection.PHCollection[*shared_album.SharedAlbum]{
 			Item:   item,
 			Assets: assets,
 		}

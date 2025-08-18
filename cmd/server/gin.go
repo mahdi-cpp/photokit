@@ -12,8 +12,15 @@ import (
 	"time"
 )
 
-var port = 8081
-var router = gin.Default()
+var port = 50101
+
+// Declare 'router' at the package level, making it a global variable
+var router *gin.Engine
+
+func ginInit() {
+	gin.SetMode(gin.ReleaseMode)
+	router = gin.Default() // Initialize the Gin engine with default middleware
+}
 
 func startServer(router *gin.Engine) {
 
