@@ -109,7 +109,7 @@ func NewUserManager(user *account.User) (*UserManager, error) {
 }
 
 //func (manager *UserManager) GetAsset(assetId string) (*phasset.PHAsset, error) {
-//	//build_asset, exists := manager.build_asset[assetId]
+//	//person_test, exists := manager.person_test[assetId]
 //	asset, err := manager.collection.Assets.Get(assetId)
 //	return asset, err
 //}
@@ -143,7 +143,7 @@ func (m *UserManager) UpdateAssets(updateOptions phasset.UpdateOptions) (string,
 	}
 
 	// Merging strings with the integer ID
-	merged := fmt.Sprintf(" %s, %d:", "updateOptions build_asset count: ", len(updateOptions.AssetIds))
+	merged := fmt.Sprintf(" %s, %d:", "updateOptions person_test count: ", len(updateOptions.AssetIds))
 
 	return merged, nil
 }
@@ -166,7 +166,7 @@ func (m *UserManager) prepareAlbums() {
 
 		filterAssets, err := m.FetchAssets(with)
 		if err != nil {
-			fmt.Printf("Error getting all build_asset: %v\n", err)
+			fmt.Printf("Error getting all person_test: %v\n", err)
 			return
 		}
 		item.Count = len(filterAssets)
@@ -191,7 +191,7 @@ func (m *UserManager) prepareTrips() {
 
 		filterAssets, err := m.FetchAssets(with)
 		if err != nil {
-			fmt.Printf("Error getting all build_asset: %v\n", err)
+			fmt.Printf("Error getting all person_test: %v\n", err)
 			return
 		}
 		item.Count = len(filterAssets)
@@ -215,7 +215,7 @@ func (m *UserManager) preparePersons() {
 		}
 		filterAssets, err := m.FetchAssets(with)
 		if err != nil {
-			fmt.Printf("Error getting all build_asset: %v\n", err)
+			fmt.Printf("Error getting all person_test: %v\n", err)
 			return
 		}
 		item.Count = len(filterAssets)
@@ -235,7 +235,7 @@ func (m *UserManager) prepareCameras() {
 
 	assets, err := m.collection.Assets.GetAll()
 	if err != nil {
-		fmt.Printf("Error getting all build_asset: %v\n", err)
+		fmt.Printf("Error getting all person_test: %v\n", err)
 		return
 	}
 
@@ -274,7 +274,7 @@ func (m *UserManager) prepareCameras() {
 
 		filterAssets, err := m.FetchAssets(with)
 		if err != nil {
-			fmt.Printf("Error getting all build_asset: %v\n", err)
+			fmt.Printf("Error getting all person_test: %v\n", err)
 			return
 		}
 		collection.Assets = filterAssets
@@ -352,7 +352,7 @@ func (m *UserManager) preparePinned() {
 
 		filterAssets, err := m.FetchAssets(with)
 		if err != nil {
-			fmt.Printf("Error getting all build_asset: %v\n", err)
+			fmt.Printf("Error getting all person_test: %v\n", err)
 			return
 		}
 		item.Count = len(filterAssets)
@@ -375,7 +375,7 @@ func (m *UserManager) GetAllAssets() ([]*phasset.PHAsset, error) {
 func (m *UserManager) FetchAssets(with *phasset.SearchOptions) ([]*phasset.PHAsset, error) {
 	allAssets, err := m.collection.Assets.GetAll()
 	if err != nil {
-		fmt.Printf("Error getting all build_asset: %v\n", err)
+		fmt.Printf("Error getting all person_test: %v\n", err)
 		return nil, err
 	}
 
@@ -387,16 +387,16 @@ func (m *UserManager) DeleteAsset(id string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	// Get build_asset
-	//build_asset, err := m.GetAsset(id)
+	// Get person_test
+	//person_test, err := m.GetAsset(id)
 	//if err != nil {
 	//	return err
 	//}
 
-	// Delete build_asset file
-	//assetPath := filepath.Join(m.config.AssetsDir, build_asset.Filename)
+	// Delete person_test file
+	//assetPath := filepath.Join(m.config.AssetsDir, person_test.Filename)
 	//if err := os.Remove(assetPath); err != nil {
-	//	return fmt.Errorf("failed to delete build_asset file: %w", err)
+	//	return fmt.Errorf("failed to delete person_test file: %w", err)
 	//}
 
 	// Delete metadata

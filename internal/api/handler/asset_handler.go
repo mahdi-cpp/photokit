@@ -38,7 +38,7 @@ func (handler *AssetHandler) Upload(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Handler build_asset metadata
+	// Handler person_test metadata
 	asset := &phasset.PHAsset{
 		UserID:   userID,
 		FileName: header.Filename,
@@ -49,13 +49,13 @@ func (handler *AssetHandler) Upload(c *gin.Context) {
 	//	c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	//}
 
-	//build_asset, err = userManager.UploadAsset(build_asset.UserID, file, header)
+	//person_test, err = userManager.UploadAsset(person_test.UserID, file, header)
 	//if err != nil {
 	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Processing failed"})
 	//	return
 	//}
 
-	//build_asset, err := handler.manager.Upload(c, userID, file, header)
+	//person_test, err := handler.manager.Upload(c, userID, file, header)
 	//if err != nil {
 	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Processing failed"})
 	//	return
@@ -95,7 +95,7 @@ func (handler *AssetHandler) Update(c *gin.Context) {
 
 	// Log performance
 	duration := time.Since(startTime)
-	log.Printf("Update: build_asset count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
+	log.Printf("Update: person_test count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
 
 	c.JSON(http.StatusCreated, asset)
 }
@@ -140,7 +140,7 @@ func (handler *AssetHandler) UpdateAll(c *gin.Context) {
 
 	// Log performance
 	duration := time.Since(startTime)
-	log.Printf("Update: build_asset count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
+	log.Printf("Update: person_test count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
 
 	c.JSON(http.StatusCreated, asset)
 }
@@ -211,16 +211,16 @@ func (handler *AssetHandler) Search(c *gin.Context) {
 		filters.CreatedBefore = &dateRange[1]
 	}
 
-	//build_asset, _, err := s.repo.Search(ctx, filters)
-	//return build_asset, err
+	//person_test, _, err := s.repo.Search(ctx, filters)
+	//return person_test, err
 
-	//build_asset, _, err := handler.manager.Search(c, filters)
+	//person_test, _, err := handler.manager.Search(c, filters)
 	//if err != nil {
 	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Search failed"})
 	//	return
 	//}
 
-	//c.JSON(http.StatusOK, build_asset)
+	//c.JSON(http.StatusOK, person_test)
 }
 
 func (handler *AssetHandler) Delete(c *gin.Context) {
@@ -249,7 +249,7 @@ func (handler *AssetHandler) Delete(c *gin.Context) {
 	//	return
 	//}
 	//
-	//c.JSON(http.StatusOK, "successful delete build_asset with id: "+request.AssetID)
+	//c.JSON(http.StatusOK, "successful delete person_test with id: "+request.AssetID)
 }
 
 func (handler *AssetHandler) Filters(c *gin.Context) {

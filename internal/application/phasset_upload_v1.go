@@ -1,6 +1,6 @@
 package application
 
-//func (userStorage *UserManager) UploadAsset(userID int, file multipart.File, header *multipart.FileHeader) (*build_asset.PHAsset, error) {
+//func (userStorage *UserManager) UploadAsset(userID int, file multipart.File, header *multipart.FileHeader) (*person_test.PHAsset, error) {
 //
 //	// Check file size
 //	//if header.Size > userStorage.config.MaxUploadSize {
@@ -13,14 +13,14 @@ package application
 //		return nil, fmt.Errorf("failed to read file: %w", err)
 //	}
 //
-//	// Handler build_asset filename
+//	// Handler person_test filename
 //	ext := filepath.Ext(header.Filename)
 //	filename := fmt.Sprintf("%d%s", 1, ext)
 //	assetPath := filepath.Join(userStorage.config.AssetsDir, filename)
 //
-//	// Save build_asset file
+//	// Save person_test file
 //	if err := os.WriteFile(assetPath, fileBytes, 0644); err != nil {
-//		return nil, fmt.Errorf("failed to save build_asset: %w", err)
+//		return nil, fmt.Errorf("failed to save person_test: %w", err)
 //	}
 //
 //	// Initialize the ImageExtractor with the path to exiftool
@@ -33,8 +33,8 @@ package application
 //	}
 //	mediaType := asset_create.GetMediaType(ext)
 //
-//	// Handler build_asset
-//	build_asset := &build_asset.PHAsset{
+//	// Handler person_test
+//	person_test := &person_test.PHAsset{
 //		ID:           userStorage.lastID,
 //		UserID:       userID,
 //		Filename:     filename,
@@ -46,14 +46,14 @@ package application
 //	}
 //
 //	// Save metadata
-//	if err := userStorage.metadata.SaveMetadata(build_asset); err != nil {
-//		// Clean up build_asset file if metadata save fails
+//	if err := userStorage.metadata.SaveMetadata(person_test); err != nil {
+//		// Clean up person_test file if metadata save fails
 //		os.Remove(assetPath)
 //		return nil, fmt.Errorf("failed to save metadata: %w", err)
 //	}
 //
 //	// Add to indexes
-//	//userStorage.addToIndexes(build_asset)
+//	//userStorage.addToIndexes(person_test)
 //
 //	// Update stats
 //	userStorage.statsMu.Lock()
@@ -61,5 +61,5 @@ package application
 //	userStorage.stats.Uploads24h++
 //	userStorage.statsMu.Unlock()
 //
-//	return build_asset, nil
+//	return person_test, nil
 //}

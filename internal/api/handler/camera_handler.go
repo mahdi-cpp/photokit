@@ -140,10 +140,10 @@ func (handler *CameraHandler) GetList(c *gin.Context) {
 	//}
 
 	//for i, item := range items {
-	//	//build_asset, _ := userManager.CameraManager.GetItemAssets(item.ID)
+	//	//person_test, _ := userManager.CameraManager.GetItemAssets(item.ID)
 	//	result.collection[i] = &model.PHCollection[*model.Camera]{
 	//		Item:   item,
-	//		Assets: build_asset,
+	//		Assets: person_test,
 	//	}
 	//}
 	cc := gin.H{"collections": a}

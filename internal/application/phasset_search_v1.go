@@ -19,7 +19,7 @@ package application
 //	return func(asset asset.PHAsset) bool {
 //
 //		// Filter by UserID (if non-zero)
-//		//if with.UserID != 0 && build_asset.UserID != with.UserID {
+//		//if with.UserID != 0 && person_test.UserID != with.UserID {
 //		//	return false
 //		//}
 //
@@ -151,13 +151,13 @@ package application
 //		}
 //
 //		// Location filtering
-//		//if len(build_asset.Location) == 2 {
+//		//if len(person_test.Location) == 2 {
 //		//
 //		//	// Near point + radius search
 //		//	if len(with.NearPoint) == 2 && with.WithinRadius > 0 {
 //		//		distance := indexer.haversineDistance(
 //		//			with.NearPoint[0], with.NearPoint[1],
-//		//			build_asset.Location[0], build_asset.Location[1],
+//		//			person_test.Location[0], person_test.Location[1],
 //		//		)
 //		//		if distance > with.WithinRadius {
 //		//			return false
@@ -166,7 +166,7 @@ package application
 //		//
 //		//	// Bounding box search
 //		//	if len(with.BoundingBox) == 4 {
-//		//		if !indexer.isInBoundingBox(build_asset.Location, with.BoundingBox) {
+//		//		if !indexer.isInBoundingBox(person_test.Location, with.BoundingBox) {
 //		//			return false
 //		//		}
 //		//	}

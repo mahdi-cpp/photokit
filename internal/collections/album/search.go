@@ -1,7 +1,7 @@
 package album
 
 import (
-	"github.com/mahdi-cpp/photokit/internal/search"
+	"github.com/mahdi-cpp/api-go-pkg/search"
 	"strings"
 )
 

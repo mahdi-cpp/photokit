@@ -1,7 +1,7 @@
 package shared_album
 
 import (
-	"github.com/mahdi-cpp/photokit/internal/update"
+	"github.com/mahdi-cpp/api-go-pkg/update"
 	"time"
 )
 

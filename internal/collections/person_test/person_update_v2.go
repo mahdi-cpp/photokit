@@ -1,7 +1,7 @@
-package build_asset
+package person_test
 
 import (
-	"github.com/mahdi-cpp/photokit/internal/update"
+	"github.com/mahdi-cpp/api-go-pkg/update"
 )
 
 type Comment struct {

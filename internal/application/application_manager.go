@@ -53,7 +53,7 @@ func NewApplicationManager() (*AppManager, error) {
 //
 //	//// Alternative using PHCollection directly
 //	//type UserPHCollection struct {
-//	//	collection []*build_asset.PHCollection[account.User] `json:"collections"`
+//	//	collection []*person_test.PHCollection[account.User] `json:"collections"`
 //	//}
 //
 //	ac := account.NewAccountManager()
