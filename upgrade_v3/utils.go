@@ -1,4 +1,4 @@
-package upgrade
+package upgrade_v3
 
 import (
 	"encoding/json"
@@ -6,49 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 )
-
-// readJsonFilesFromDirectory reads all .json file_working from the specified directory
-// and unmarshals them into a slice of MyData.
-func readJsonFilesFromDirectory(dirPath string) ([]PHAssetV1, error) {
-
-	var assetsV1 []PHAssetV1
-
-	// Read all directory entries
-	files, err := os.ReadDir(dirPath) // Use os.ReadDir(dirPath) for Go 1.16+
-	if err != nil {
-		return nil, fmt.Errorf("failed to read directory: %w", err)
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue // Skip subdirectories
-		}
-
-		if strings.HasSuffix(file.Name(), ".json") {
-			filePath := filepath.Join(dirPath, file.Name())
-
-			// Read file content
-			content, err := os.ReadFile(filePath) // Use os.ReadFile(filePath) for Go 1.16+
-			if err != nil {
-				return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
-			}
-
-			var data PHAssetV1
-			// Unmarshal JSON content
-			if err := json.Unmarshal(content, &data); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal JSON from %s: %w", filePath, err)
-			}
-			assetsV1 = append(assetsV1, data)
-		}
-	}
-	return assetsV1, nil
-}
 
 func CreateDirectory(dirPath string) error {
 
@@ -67,6 +28,7 @@ func CreateDirectory(dirPath string) error {
 }
 
 func WriteData[T any](filePath string, data *T) error {
+
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return err
@@ -269,4 +231,27 @@ func contains(s []int, e int) bool {
 		}
 	}
 	return false
+}
+
+// ParseFlexibleTime attempts to parse a time string using multiple predefined layouts.
+// It tries to parse with the first layout, and if it fails, it tries the next, and so on.
+// If all layouts fail, it returns an error.
+func ParseFlexibleTime(timeString string) (time.Time, error) {
+	// Define the layouts in order of preference or likelihood.
+	// time.RFC3339 handles the "+08:00" timezone offset.
+	// The second layout matches "YYYY:MM:DD HH:MM:SS" without a timezone.
+	layouts := []string{
+		"2006:01:02 15:04:05-07:00", // For "2022:03:10 20:59:53+08:00"
+		"2006:01:02 15:04:05",       // For "2024:10:17 14:22:22"
+	}
+
+	for _, layout := range layouts {
+		t, err := time.Parse(layout, timeString)
+		if err == nil {
+			return t, nil // Successfully parsed
+		}
+	}
+
+	// If none of the layouts matched, return an error
+	return time.Time{}, fmt.Errorf("could not parse time string '%s' with any of the supported layouts", timeString)
 }

@@ -1,4 +1,4 @@
-package application
+package depricated
 
 //
 //import (
@@ -76,7 +76,7 @@ package application
 //		}
 //
 //		// Filter by  int
-//		if with.PixelWidth != 0 && asset.PixelWidth != with.PixelWidth {
+//		if with.ImageWidth != 0 && asset.ImageWidth != with.ImageWidth {
 //			return false
 //		}
 //		if with.PixelHeight != 0 && asset.PixelHeight != with.PixelHeight {
@@ -85,7 +85,7 @@ package application
 //
 //		// Filter by landscape orientation
 //		if with.IsLandscape != nil {
-//			isLandscape := asset.PixelWidth > asset.PixelHeight
+//			isLandscape := asset.ImageWidth > asset.PixelHeight
 //			if isLandscape != *with.IsLandscape {
 //				return false
 //			}

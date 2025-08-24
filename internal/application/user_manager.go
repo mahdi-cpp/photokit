@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-var mahdiUserID = "0188adfd-c0c9-7b94-9a5b-3a66f84f84ac"
+var mahdiUserID = "018fe65d-8e4a-74b0-8001-c8a7c29367e1"
 
 type PhotoAssetCollection[T collection_manager_uuid7.CollectionItem] struct {
 	Collection     *collection_manager_uuid7.Manager[T]
@@ -75,7 +75,7 @@ func NewUserManager(user *account.User) (*UserManager, error) {
 	//userDirs := []string{userAssetDir, userMetadataDir, userThumbnailsDir}
 	//for _, dir := range userDirs {
 	//	if err := os.MkdirAll(dir, 0755); err != nil {
-	//		return nil, fmt.Errorf("failed to create user directory %s: %w", dir, err)
+	//		return nil, fmt.Errorf("failed to thumbnail user directory %s: %w", dir, err)
 	//	}
 	//}
 
@@ -87,17 +87,17 @@ func NewUserManager(user *account.User) (*UserManager, error) {
 	}
 
 	var err error
-	userManager.collection.Assets, err = collection_manager_uuid7.NewCollectionManager[*phasset.PHAsset](config.GetUserPath(user.PhoneNumber, "metadatas"), false)
+	userManager.collection.Assets, err = collection_manager_uuid7.NewCollectionManager[*phasset.PHAsset](config.GetUserPath(user.ID, "metadatas/v2/assets"), false)
 	if err != nil {
 		panic(err)
 	}
 
-	userManager.collection.Album = NewPhotoAssetCollection[*album.Album](config.GetUserPath(user.PhoneNumber, "data/albums.json"))
-	userManager.collection.SharedAlbums = NewPhotoAssetCollection[*shared_album.SharedAlbum](config.GetUserPath(user.PhoneNumber, "data/shared_albums.json"))
-	userManager.collection.Trips = NewPhotoAssetCollection[*trip.Trip](config.GetUserPath(user.PhoneNumber, "data/trips.json"))
-	userManager.collection.Persons = NewPhotoAssetCollection[*person.Person](config.GetUserPath(user.PhoneNumber, "data/persons.json"))
-	userManager.collection.Pinned = NewPhotoAssetCollection[*pinned.Pinned](config.GetUserPath(user.PhoneNumber, "data/pinned.json"))
-	userManager.collection.Villages = NewPhotoAssetCollection[*village.Village](config.GetPath("/data/villages.json"))
+	userManager.collection.Album = NewPhotoAssetCollection[*album.Album](config.GetUserPath(user.ID, "metadatas/v2/albums"))
+	userManager.collection.SharedAlbums = NewPhotoAssetCollection[*shared_album.SharedAlbum](config.GetUserPath(user.ID, "metadatas/v2/albums"))
+	userManager.collection.Trips = NewPhotoAssetCollection[*trip.Trip](config.GetUserPath(user.ID, "metadatas/v2/trips"))
+	userManager.collection.Persons = NewPhotoAssetCollection[*person.Person](config.GetUserPath(user.ID, "metadatas/v2/persons"))
+	userManager.collection.Pinned = NewPhotoAssetCollection[*pinned.Pinned](config.GetUserPath(user.ID, "metadatas/v2/pins"))
+	userManager.collection.Villages = NewPhotoAssetCollection[*village.Village](config.GetPath("/metadatas/v2/villages"))
 
 	userManager.prepareAlbums()
 	userManager.prepareTrips()
@@ -107,12 +107,6 @@ func NewUserManager(user *account.User) (*UserManager, error) {
 
 	return userManager, nil
 }
-
-//func (manager *UserManager) GetAsset(assetId string) (*phasset.PHAsset, error) {
-//	//person_test, exists := manager.person_test[assetId]
-//	asset, err := manager.collection.Assets.Get(assetId)
-//	return asset, err
-//}
 
 func (m *UserManager) UpdateCollections() {
 	m.prepareAlbums()
@@ -256,7 +250,7 @@ func (m *UserManager) prepareCameras() {
 					CameraModel: phAsset.CameraModel,
 					Count:       1},
 			}
-			fmt.Println(collection)
+			//fmt.Println(collection)
 			m.cameras[phAsset.CameraModel] = collection
 		}
 	}
@@ -327,7 +321,7 @@ func (m *UserManager) preparePinned() {
 			break
 		case "map":
 			var assets []*phasset.PHAsset
-			asset := phasset.PHAsset{ID: "12", MediaType: "image", Url: "map", FileName: "map"}
+			asset := phasset.PHAsset{ID: "12", MediaType: "image", BaseURL: "map", FileName: "map"}
 			assets = append(assets, &asset)
 			m.collection.Pinned.PhotoAssetList[item.ID] = assets
 			break

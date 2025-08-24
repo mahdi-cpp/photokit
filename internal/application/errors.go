@@ -63,14 +63,14 @@ func (e *AppError) Wrap(err error) *AppError {
 
 // Predefined application errors
 var (
-	// 400 Bad Request
+	// ErrInvalidInput 400 Bad Request
 	ErrInvalidInput = &AppError{
 		Code:       ErrCodeInvalidInput,
 		Message:    "Invalid input provided",
 		HTTPStatus: http.StatusBadRequest,
 	}
 
-	// 401 Unauthorized
+	// ErrUnauthorized 401 Unauthorized
 	ErrUnauthorized = &AppError{
 		Code:       ErrCodeUnauthorized,
 		Message:    "Authentication required",

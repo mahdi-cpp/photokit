@@ -1,4 +1,4 @@
-package upgrade
+package upgrade_v3
 
 import "time"
 
@@ -59,6 +59,8 @@ type TripV2 struct {
 }
 
 //-----------------------------------------------------
+
+type MediaType string
 
 type PHAssetV2 struct {
 	ID      string `json:"id"`

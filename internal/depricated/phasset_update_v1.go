@@ -1,4 +1,4 @@
-package application
+package depricated
 
 //import (
 //	//"github.com/mahdi-cpp/api-go-pkg/asset"

@@ -47,7 +47,10 @@ func (handler *AlbumHandler) Create(c *gin.Context) {
 		return
 	}
 
-	update := phasset.UpdateOptions{AssetIds: request.AssetIds, AddAlbums: []string{newItem.ID}}
+	update := phasset.UpdateOptions{
+		AssetIds:  request.AssetIds,
+		AddAlbums: []string{newItem.ID},
+	}
 	_, err = userManager.UpdateAssets(update)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -130,11 +133,11 @@ func (handler *AlbumHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusCreated, "delete ok")
 }
 
-func (handler *AlbumHandler) GetCollectionList(c *gin.Context) {
+func (handler *AlbumHandler) GetAll(c *gin.Context) {
 
 	userID, err := account.GetUserId(c)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -143,20 +146,32 @@ func (handler *AlbumHandler) GetCollectionList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
-	item2, err := userManager.GetCollections().Album.Collection.GetAll()
+	items, err := userManager.GetCollections().Album.Collection.GetAll()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	c.JSON(http.StatusCreated, item2)
+	result := collection.PHCollectionList[*album.Album]{
+		Collections: make([]*collection.PHCollection[*album.Album], len(items)),
+	}
+
+	for i, item := range items {
+		assets, _ := userManager.GetCollections().Album.PhotoAssetList[item.ID]
+		result.Collections[i] = &collection.PHCollection[*album.Album]{
+			Item:   item,
+			Assets: assets,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }
 
-func (handler *AlbumHandler) GetListV2(c *gin.Context) {
+func (handler *AlbumHandler) GetBySearchOptions(c *gin.Context) {
 
 	userID, err := account.GetUserId(c)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -178,10 +193,10 @@ func (handler *AlbumHandler) GetListV2(c *gin.Context) {
 		return
 	}
 
-	albums := album.Search(items, searchOptions)
+	filterItems := album.Search(items, searchOptions)
 
 	result := collection.PHCollectionList[*album.Album]{
-		Collections: make([]*collection.PHCollection[*album.Album], len(albums)),
+		Collections: make([]*collection.PHCollection[*album.Album], len(filterItems)),
 	}
 
 	for i, item := range items {

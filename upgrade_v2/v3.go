@@ -2,7 +2,7 @@ package upgrade
 
 import "time"
 
-type AlbumV2 struct {
+type AlbumV3 struct {
 	ID                string    `json:"id"`
 	Title             string    `json:"title"`
 	Subtitle          string    `json:"subtitle"`
@@ -17,7 +17,7 @@ type AlbumV2 struct {
 	Version           string    `json:"version"`
 }
 
-type PersonV2 struct {
+type PersonV3 struct {
 	ID           string    `json:"id"`
 	Title        string    `json:"title"`
 	Subtitle     string    `json:"subtitle"`
@@ -30,7 +30,7 @@ type PersonV2 struct {
 	Version      string    `json:"version"`
 }
 
-type PinnedV2 struct {
+type PinnedV3 struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	Subtitle  string    `json:"subtitle"`
@@ -45,7 +45,7 @@ type PinnedV2 struct {
 	Version   string    `json:"version"`
 }
 
-type TripV2 struct {
+type TripV3 struct {
 	ID           string    `json:"id"`
 	Title        string    `json:"title"`
 	Subtitle     string    `json:"subtitle"`
@@ -60,19 +60,16 @@ type TripV2 struct {
 
 //-----------------------------------------------------
 
-type PHAssetV2 struct {
-	ID      string `json:"id"`
-	UserID  string `json:"userID"`
-	BaseURL string `json:"baseURL"`
-	//Url                 string    `json:"url"`
-	FileName            string    `json:"fileName"`
-	FilePath            string    `json:"filePath"`
-	Format              string    `json:"format"`
+type PHAssetV3 struct {
+	ID                  string    `json:"id"`
+	UserID              string    `json:"userID"`
+	BaseURL             string    `json:"baseURL"`
+	FileSize            string    `json:"fileSize"`
+	FileType            string    `json:"fileType"`
 	MediaType           MediaType `json:"mediaType"`
-	Orientation         int       `json:"orientation"`
+	Orientation         string    `json:"orientation"`
 	PixelWidth          int       `json:"pixelWidth"`
 	PixelHeight         int       `json:"pixelHeight"`
-	Place               PlaceV2   `json:"place"`
 	CameraMake          string    `json:"cameraMake"`
 	CameraModel         string    `json:"cameraModel"`
 	IsCamera            bool      `json:"isCamera"`
@@ -87,6 +84,7 @@ type PHAssetV2 struct {
 	CanEditContent      bool      `json:"canEditContent"`
 	CanAddToSharedAlbum bool      `json:"canAddToSharedAlbum"`
 	IsUserLibraryAsset  bool      `json:"IsUserLibraryAsset"`
+	Place               PlaceV3   `json:"place"`
 	CapturedDate        time.Time `json:"capturedDate"`
 	CreatedAt           time.Time `json:"createdAt"`
 	UpdatedAt           time.Time `json:"updatedAt"`
@@ -94,7 +92,7 @@ type PHAssetV2 struct {
 	Version             string    `json:"version"`
 }
 
-type PlaceV2 struct {
+type PlaceV3 struct {
 	Latitude   float64 `json:"location"`
 	Longitude  float64 `json:"longitude"`
 	Country    string  `json:"country"`

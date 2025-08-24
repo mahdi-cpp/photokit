@@ -14,9 +14,10 @@ func (a *PHAsset) GetUpdatedAt() time.Time  { return a.UpdatedAt }
 type MediaType string
 
 type PHAsset struct {
-	ID                    string    `json:"id"`
-	UserID                string    `json:"userID"`
-	Url                   string    `json:"url"`
+	ID     string `json:"id"`
+	UserID string `json:"userID"`
+	//Url                   string    `json:"url"`
+	BaseURL               string    `json:"baseURL"`
 	FileName              string    `json:"fileName"`
 	FilePath              string    `json:"filePath"`
 	Format                string    `json:"format"`

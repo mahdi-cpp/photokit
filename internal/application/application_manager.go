@@ -12,22 +12,28 @@ import (
 )
 
 type AppManager struct {
-	mu             sync.RWMutex
-	users          map[string]*account.User
-	userManagers   map[string]*UserManager // Maps user IDs to their UserManager
-	AccountManager *account.ClientManager
-	ctx            context.Context
-	cancel         context.CancelFunc
-	wg             sync.WaitGroup
+	mu                  sync.RWMutex
+	Users               map[string]*account.User
+	userManagers        map[string]*UserManager // Maps user IDs to their UserManager
+	AccountManager      *account.ClientManager
+	ctx                 context.Context
+	cancel              context.CancelFunc
+	wg                  sync.WaitGroup
+	initialUserList     chan struct{} // Add this channel
+	initialListReceived bool          // Add this flag
 }
 
 func NewApplicationManager() (*AppManager, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
+	//defer cancel()
+
 	manager := &AppManager{
-		userManagers: make(map[string]*UserManager),
-		users:        make(map[string]*account.User),
-		ctx:          ctx,
+		userManagers:    make(map[string]*UserManager),
+		Users:           make(map[string]*account.User),
+		ctx:             ctx,
+		cancel:          cancel, // Store the cancel function
+		initialUserList: make(chan struct{}),
 	}
 
 	var err error
@@ -57,18 +63,22 @@ func NewApplicationManager() (*AppManager, error) {
 //	//}
 //
 //	ac := account.NewAccountManager()
-//	users, err := ac.GetAll()
+//	Users, err := ac.GetAll()
 //	if err != nil {
 //		return
 //	}
 //
-//	for _, user := range *users {
+//	for _, user := range *Users {
 //		fmt.Printf("User ID: %d\n", user.ID)
 //		fmt.Printf("Username: %s\n", user.Username)
 //		fmt.Printf("Name: %s %s\n", user.FirstName, user.LastName)
-//		manager.users[user.ID] = &user
+//		manager.Users[user.ID] = &user
 //	}
 //}
+
+func (manager *AppManager) StartUpgrade() error {
+	return nil
+}
 
 func (manager *AppManager) GetUserManager(c *gin.Context, userID string) (*UserManager, error) {
 
@@ -90,7 +100,7 @@ func (manager *AppManager) GetUserManager(c *gin.Context, userID string) (*UserM
 
 func (manager *AppManager) CreateManager(userID string) (*UserManager, error) {
 
-	var user = manager.users[userID]
+	var user = manager.Users[userID]
 	if user == nil {
 		fmt.Println("user is nil")
 		return nil, fmt.Errorf("user not found")
@@ -185,14 +195,14 @@ func (m *AppManager) accountCallback(msg *redis.Message) {
 }
 
 func (m *AppManager) processUserList() {
-	// Access users in a thread-safe manner
+	// Access Users in a thread-safe manner
 	users := m.AccountManager.Users // Assuming you add this method to account manager
 
 	fmt.Println("")
-	log.Printf("Received user list update with %d users", len(users))
+	log.Printf("Received user list update with %d Users", len(users))
 
 	//Example processing - replace with your actual logic
-	//for _, user := range users {
+	//for _, user := range Users {
 	//	log.Printf("User: %s %s       (%s)",
 	//		user.FirstName, user.LastName, user.PhoneNumber)
 	//}
@@ -206,20 +216,25 @@ func (m *AppManager) processUserList() {
 		log.Printf("%-*s  %s     %s", maxNameLength, fullName, user.PhoneNumber, user.ID)
 	}
 
-	// UpdateOptions application state with the new user list
-	m.updateApplicationState(users)
-}
-
-func (m *AppManager) updateApplicationState(users []*account.User) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
 	for _, user := range users {
-		m.users[user.ID] = user
+		m.Users[user.ID] = user
 	}
 
-	// UpdateOptions application state based on new user data
-	// Example: m.Chats.UpdateUsers(users)
-	//m.PrepareAccountChats("0198bdb6-378d-7b3a-8036-a57d3761f5de")
+	// Signal that initial list is received (only once)
+	if !m.initialListReceived {
+		m.initialListReceived = true
+		close(m.initialUserList)
+	}
 
+}
+
+func (m *AppManager) WaitForInitialUserList(timeout time.Duration) error {
+	select {
+	case <-m.initialUserList:
+		return nil
+	case <-time.After(timeout):
+		return fmt.Errorf("timeout waiting for initial user list")
+	case <-m.ctx.Done():
+		return fmt.Errorf("context cancelled while waiting for user list")
+	}
 }

@@ -257,20 +257,21 @@ func (handler *AssetHandler) Filters(c *gin.Context) {
 	userID, err := account.GetUserId(c)
 	if err != nil {
 		fmt.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "userID must be an integer"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	var with *phasset.SearchOptions
 	if err := c.ShouldBindJSON(&with); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		fmt.Println("Invalid request")
+		fmt.Println("Invalid request 5")
 		return
 	}
 
 	fmt.Println("userID: ", userID)
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
+		fmt.Println(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -281,12 +282,14 @@ func (handler *AssetHandler) Filters(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("Filters count", len(items))
+
 	//result := asset.PHFetchResult[*phasset.PHAsset]{
 	//	Items:  items,
 	//	Total:  total,
 	//	Limit:  100,
 	//	Offset: 100,
 	//}
-
-	c.JSON(http.StatusOK, items)
+	//c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, gin.H{"data": items})
 }

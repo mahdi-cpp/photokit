@@ -15,3 +15,7 @@ func GetFileSize(filepath string) (int64, error) {
 func GetBoolPointer(b bool) *bool {
 	return &b
 }
+
+func CheckVersionIsUpToDate(versionCode int) bool {
+	return true
+}

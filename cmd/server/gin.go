@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -20,6 +21,16 @@ var router *gin.Engine
 func ginInit() {
 	gin.SetMode(gin.ReleaseMode)
 	router = gin.Default() // Initialize the Gin engine with default middleware
+
+	// Configure CORS middleware
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://192.168.1.114:3000"}, // Allow your Svelte app's origin
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "userid"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 }
 
 func startServer(router *gin.Engine) {

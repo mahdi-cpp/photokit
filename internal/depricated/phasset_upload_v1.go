@@ -1,4 +1,4 @@
-package application
+package depricated
 
 //func (userStorage *UserManager) UploadAsset(userID int, file multipart.File, header *multipart.FileHeader) (*person_test.PHAsset, error) {
 //
@@ -23,8 +23,8 @@ package application
 //		return nil, fmt.Errorf("failed to save person_test: %w", err)
 //	}
 //
-//	// Initialize the ImageExtractor with the path to exiftool
-//	extractor := asset_create.NewMetadataExtractor("/usr/local/bin/exiftool")
+//	// Initialize the ImageExtractor with the path to exiftool_v1
+//	extractor := asset_create.NewMetadataExtractor("/usr/local/bin/exiftool_v1")
 //
 //	// Extract metadata
 //	width, height, camera, err := extractor.ExtractMetadata(assetPath)
@@ -40,7 +40,7 @@ package application
 //		Filename:     filename,
 //		CreationDate: time.Now(),
 //		MediaType:    mediaType,
-//		PixelWidth:   width,
+//		ImageWidth:   width,
 //		PixelHeight:  height,
 //		CameraModel:  camera,
 //	}

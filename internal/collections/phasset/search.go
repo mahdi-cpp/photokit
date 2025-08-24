@@ -29,9 +29,9 @@ func BuildPHAssetSearchCriteria(with *SearchOptions) search.SearchCriteria[*PHAs
 	return func(c *PHAsset) bool {
 
 		// ID filter
-		if with.ID != "" && c.ID != with.ID {
-			return false
-		}
+		//if with.ID != "" && c.ID != with.ID {
+		//	return false
+		//}
 
 		// Title search_manager (case-insensitive)
 		if with.TextQuery != "" {

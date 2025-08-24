@@ -1,4 +1,4 @@
-package main
+package upgrade
 
 import (
 	"fmt"
@@ -40,6 +40,8 @@ func upgradePHAssets(userID string, albumArrayV1 []*AlbumV1, tripArrayV1 []*Trip
 
 		itemArrayV2[i].FileName = itemArrayV1[i].Filename
 		itemArrayV2[i].FilePath = itemArrayV1[i].Filepath
+		itemArrayV2[i].BaseURL = filepath.Join("com.helium.photos/users", itemArrayV2[i].UserID, "assets")
+		//itemArrayV2[i].Url = itemArrayV2[i].ID + ".jpg"
 
 		if itemArrayV1[i].Albums != nil {
 			for _, item := range albumArrayV1 {
@@ -65,6 +67,19 @@ func upgradePHAssets(userID string, albumArrayV1 []*AlbumV1, tripArrayV1 []*Trip
 
 		itemArrayV2[i].CreatedAt = itemArrayV1[i].CreationDate
 		itemArrayV2[i].UpdatedAt = time.Now()
+
+		/*
+			renameErr := RenameFile(filepath.Join(assetsDir, strconv.Itoa(itemArrayV1[i].ID)+".jpg"), filepath.Join(assetsDir, itemArrayV2[i].ID+".jpg"))
+			if renameErr != nil {
+				return nil, renameErr
+			}
+
+			renameErr = RenameFile(filepath.Join(thumbnailsDir, strconv.Itoa(itemArrayV1[i].ID)+"_270.jpg"), filepath.Join(thumbnailsDir, itemArrayV2[i].ID+"_270.jpg"))
+			if renameErr != nil {
+				return nil, renameErr
+			}
+
+		*/
 
 		index++
 	}

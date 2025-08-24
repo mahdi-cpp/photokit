@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/mahdi-cpp/photokit/internal/api/handler"
 	"github.com/mahdi-cpp/photokit/internal/application"
+	"github.com/mahdi-cpp/photokit/upgrade_v3"
 	"log"
+	"time"
 )
 
 func main() {
@@ -13,13 +16,26 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Wait for initial user list with 10 second timeout
+	if err := userStorageManager.WaitForInitialUserList(10 * time.Second); err != nil {
+		log.Printf("Warning: %v", err)
+		// You might choose to continue or exit based on your requirements
+	}
+
+	fmt.Println("execute after get users ---------------------------")
+
+	//if !utils.CheckVersionIsUpToDate(2) {
+	//upgrade.Start(userStorageManager.AccountManager)
+	upgrade_v3.Start(userStorageManager.AccountManager)
+	//}
+
 	ginInit()
 
 	assetHandler := handler.NewAssetHandler(userStorageManager)
 	assetRoute(assetHandler)
 
 	albumHandler := handler.NewAlbumHandler(userStorageManager)
-	albumRoute(albumHandler)
+	RegisterAlbumRoutes(albumHandler)
 
 	tripHandler := handler.NewTripHandler(userStorageManager)
 	tripRoute(tripHandler)
@@ -46,7 +62,7 @@ func assetRoute(h *handler.AssetHandler) {
 
 	api := router.Group("/api/v1/assets")
 
-	api.POST("create", h.Create)
+	api.POST("thumbnail", h.Create)
 	api.POST("upload", h.Upload)
 	api.GET("get:id", h.Get)
 	api.POST("update", h.Update)
@@ -55,21 +71,22 @@ func assetRoute(h *handler.AssetHandler) {
 	api.POST("filters", h.Filters)
 }
 
-func albumRoute(h *handler.AlbumHandler) {
+func RegisterAlbumRoutes(h *handler.AlbumHandler) {
 
 	api := router.Group("/api/v1/album")
 
-	api.POST("create", h.Create)
+	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
 	api.POST("delete", h.Delete)
-	api.POST("list", h.GetListV2)
+	api.POST("list", h.GetAll)
+	api.POST("search", h.GetBySearchOptions)
 }
 
 func pinnedRoute(h *handler.PinnedHandler) {
 
 	api := router.Group("/api/v1/pinned")
 
-	api.POST("create", h.Create)
+	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
 	api.POST("delete", h.Delete)
 	api.POST("list", h.GetList)
@@ -79,7 +96,7 @@ func sharedAlbumRoute(h *handler.SharedAlbumHandler) {
 
 	api := router.Group("/api/v1/shared_album")
 
-	api.POST("create", h.Create)
+	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
 	api.POST("delete", h.Delete)
 	api.POST("list", h.GetList)
@@ -89,7 +106,7 @@ func tripRoute(h *handler.TripHandler) {
 
 	api := router.Group("/api/v1/trip")
 
-	api.POST("create", h.Create)
+	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
 	api.POST("delete", h.Delete)
 	api.POST("list", h.GetCollectionList)
@@ -99,7 +116,7 @@ func personRoute(h *handler.PersonHandler) {
 
 	api := router.Group("/api/v1/person")
 
-	api.POST("create", h.Create)
+	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
 	api.POST("delete", h.Delete)
 	api.POST("list", h.GetCollectionList)
