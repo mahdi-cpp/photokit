@@ -72,9 +72,9 @@ func Update(p *PHAsset, update UpdateOptions) *PHAsset {
 //}
 
 // IsEmpty checks if the Place struct contains zero values for all its fields.
-func (p Place) IsEmpty() bool {
-	return p.Latitude == 0.0 &&
-		p.Longitude == 0.0 &&
-		p.City == "" &&
-		p.Country == ""
+func (l Location) IsEmpty() bool {
+	return l.Latitude == 0.0 &&
+		l.Longitude == 0.0 &&
+		l.City == "" &&
+		l.Country == ""
 }
