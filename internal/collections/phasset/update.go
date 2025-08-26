@@ -18,8 +18,8 @@ func init() {
 	})
 
 	metadataUpdater.AddScalarUpdater(func(a *PHAsset, u UpdateOptions) {
-		if u.MediaType != "" {
-			a.MediaType = u.MediaType
+		if u.FileSize != "" {
+			a.FileInfo.FileSize = u.FileSize
 		}
 	})
 
