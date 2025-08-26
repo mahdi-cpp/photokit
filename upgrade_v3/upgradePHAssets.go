@@ -2,6 +2,7 @@ package upgrade_v3
 
 import (
 	"fmt"
+	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"github.com/mahdi-cpp/photokit/tools/exiftool"
 	"github.com/mahdi-cpp/photokit/tools/exiftool_v1"
 	"os"
@@ -52,7 +53,7 @@ func upgradePHAssets(userID string) error {
 		}
 
 		// Initialize destination pointer
-		asset := PHAssetV3{}
+		asset := phasset.PHAsset{}
 		asset.ID = strings.Replace(image, ".jpg", "", 1)
 		asset.UserID = userID
 		asset.File.BaseURL = filepath.Join("com.helium.photos/users", asset.UserID, "assets")

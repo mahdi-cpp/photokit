@@ -13,51 +13,52 @@ func (a *PHAsset) GetUpdatedAt() time.Time  { return a.UpdatedAt }
 
 type MediaType string
 
-type PHAsset struct {
-	ID     string `json:"id"`
-	UserID string `json:"userID"`
-	//Url                   string    `json:"url"`
-	BaseURL               string    `json:"baseURL"`
-	FileName              string    `json:"fileName"`
-	FilePath              string    `json:"filePath"`
-	Format                string    `json:"format"`
-	MediaType             MediaType `json:"mediaType"`
-	Orientation           int       `json:"orientation"`
-	PixelWidth            int       `json:"pixelWidth"`
-	PixelHeight           int       `json:"pixelHeight"`
-	Place                 Place     `json:"place"`
-	CameraMake            string    `json:"cameraMake"`
-	CameraModel           string    `json:"cameraModel"`
-	IsCamera              bool      `json:"isCamera"`
-	IsFavorite            bool      `json:"isFavorite"`
-	IsScreenshot          bool      `json:"isScreenshot"`
-	IsHidden              bool      `json:"isHidden"`
-	Albums                []string  `json:"albums"`
-	Trips                 []string  `json:"trips"`
-	Persons               []string  `json:"persons"`
-	Duration              float64   `json:"duration"`
-	CanDelete             bool      `json:"canDelete"`
-	CanEditContent        bool      `json:"canEditContent"`
-	CanAddToSharedPHAsset bool      `json:"canAddToSharedPHAsset"`
-	IsUserLibraryAsset    bool      `json:"IsUserLibraryAsset"`
-	CapturedDate          time.Time `json:"capturedDate"`
-	CreatedAt             time.Time `json:"createdAt"`
-	UpdatedAt             time.Time `json:"updatedAt"`
-	DeletedAt             time.Time `json:"deletedAt"`
-	Version               string    `json:"version"`
-}
-
-type Place struct {
-	Latitude   float64 `json:"location"`
-	Longitude  float64 `json:"longitude"`
-	Country    string  `json:"country"`
-	Province   string  `json:"province"`
-	County     string  `json:"county"`
-	City       string  `json:"city"`
-	Village    string  `json:"village"`
-	Malard     string  `json:"malard"`
-	Electronic int     `json:"electronic"`
-}
+//
+//type PHAsset struct {
+//	ID     string `json:"id"`
+//	UserID string `json:"userID"`
+//	//Url                   string    `json:"url"`
+//	BaseURL               string    `json:"baseURL"`
+//	FileName              string    `json:"fileName"`
+//	FilePath              string    `json:"filePath"`
+//	Format                string    `json:"format"`
+//	MediaType             MediaType `json:"mediaType"`
+//	Orientation           int       `json:"orientation"`
+//	PixelWidth            int       `json:"pixelWidth"`
+//	PixelHeight           int       `json:"pixelHeight"`
+//	Place                 Place     `json:"place"`
+//	CameraMake            string    `json:"cameraMake"`
+//	CameraModel           string    `json:"cameraModel"`
+//	IsCamera              bool      `json:"isCamera"`
+//	IsFavorite            bool      `json:"isFavorite"`
+//	IsScreenshot          bool      `json:"isScreenshot"`
+//	IsHidden              bool      `json:"isHidden"`
+//	Albums                []string  `json:"albums"`
+//	Trips                 []string  `json:"trips"`
+//	Persons               []string  `json:"persons"`
+//	Duration              float64   `json:"duration"`
+//	CanDelete             bool      `json:"canDelete"`
+//	CanEditContent        bool      `json:"canEditContent"`
+//	CanAddToSharedPHAsset bool      `json:"canAddToSharedPHAsset"`
+//	IsUserLibraryAsset    bool      `json:"IsUserLibraryAsset"`
+//	CapturedDate          time.Time `json:"capturedDate"`
+//	CreatedAt             time.Time `json:"createdAt"`
+//	UpdatedAt             time.Time `json:"updatedAt"`
+//	DeletedAt             time.Time `json:"deletedAt"`
+//	Version               string    `json:"version"`
+//}
+//
+//type Place struct {
+//	Latitude   float64 `json:"location"`
+//	Longitude  float64 `json:"longitude"`
+//	Country    string  `json:"country"`
+//	Province   string  `json:"province"`
+//	County     string  `json:"county"`
+//	City       string  `json:"city"`
+//	Village    string  `json:"village"`
+//	Malard     string  `json:"malard"`
+//	Electronic int     `json:"electronic"`
+//}
 
 type UpdateOptions struct {
 	AssetIds []string `json:"assetIds,omitempty"` // Asset Ids

@@ -1,7 +1,6 @@
 package upgrade_v3
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -153,23 +152,23 @@ type Location struct {
 
 //-----------------------------------------------------
 
-func exampleCamera() {
-
-	info := CameraInfo{
-		Make:     "samsung",
-		Model:    "GT-I9515",
-		Software: "I9515XXU1BPE1",
-		//DateTimeOriginal:  time.Date("2018:03:28 11:14:47"),
-		ExposureTime:    "1/720",
-		FNumber:         2.2,
-		ISO:             50,
-		FocalLength:     "4.2 mm",
-		FocalLength35mm: "31 mm",
-		Flash:           "No Flash",
-		LightSource:     "Unknown",
-		ExposureMode:    "Auto",
-		WhiteBalance:    "Auto",
-	}
-
-	fmt.Println(info.Model)
-}
+//func exampleCamera() {
+//
+//	info := CameraInfo{
+//		Make:     "samsung",
+//		Model:    "GT-I9515",
+//		Software: "I9515XXU1BPE1",
+//		//DateTimeOriginal:  time.Date("2018:03:28 11:14:47"),
+//		ExposureTime:    "1/720",
+//		FNumber:         2.2,
+//		ISO:             50,
+//		FocalLength:     "4.2 mm",
+//		FocalLength35mm: "31 mm",
+//		Flash:           "No Flash",
+//		LightSource:     "Unknown",
+//		ExposureMode:    "Auto",
+//		WhiteBalance:    "Auto",
+//	}
+//
+//	fmt.Println(info.Model)
+//}
