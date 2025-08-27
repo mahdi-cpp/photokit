@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 )
 
-const rootDir = "/media/mahdi/happle/cloud"
-const applicationDir = "com.helium.photos"
+const rootDir = "/app/iris/"
+const applicationDir = "com.iris.photos"
 const usersDir = "users"
 
 const versionCode = 2
