@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"github.com/mahdi-cpp/photokit/internal/collections/trip"
-	"net/http"
 )
 
 type TripHandler struct {
@@ -57,10 +58,10 @@ func (handler *TripHandler) Create(c *gin.Context) {
 
 	userManager.UpdateCollections()
 
-	c.JSON(http.StatusCreated, CollectionResponse{
-		ID:    newItem.ID,
-		Title: newItem.Title,
-	})
+	//c.JSON(http.StatusCreated, CollectionResponse{
+	//	ID:    newItem.ID,
+	//	Title: newItem.Title,
+	//})
 }
 
 func (handler *TripHandler) Update(c *gin.Context) {

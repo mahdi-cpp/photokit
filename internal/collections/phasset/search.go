@@ -1,8 +1,9 @@
 package phasset
 
 import (
-	"github.com/mahdi-cpp/api-go-pkg/search"
 	"strings"
+
+	"github.com/mahdi-cpp/api-go-pkg/search"
 )
 
 var LessFuncs = map[string]search.LessFunction[*PHAsset]{
@@ -35,8 +36,8 @@ func BuildPHAssetSearchCriteria(with *SearchOptions) search.SearchCriteria[*PHAs
 
 		// Title search_manager (case-insensitive)
 		if with.TextQuery != "" {
-			query := strings.ToLower(with.FileName)
-			title := strings.ToLower(c.FilePath)
+			query := strings.ToLower(with.FileType)
+			title := strings.ToLower(c.FileInfo.FileType)
 			if !strings.Contains(title, query) {
 				return false
 			}

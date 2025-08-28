@@ -2,22 +2,23 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/mahdi-cpp/photokit/internal/api/handler"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	"github.com/mahdi-cpp/photokit/upgrade_v3"
-	"log"
-	"time"
 )
 
 func main() {
 
-	userStorageManager, err := application.NewApplicationManager()
+	applicationManager, err := application.NewApplicationManager()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Wait for initial user list with 10 second timeout
-	if err := userStorageManager.WaitForInitialUserList(10 * time.Second); err != nil {
+	if err := applicationManager.WaitForInitialUserList(10 * time.Second); err != nil {
 		log.Printf("Warning: %v", err)
 		// You might choose to continue or exit based on your requirements
 	}
@@ -25,34 +26,34 @@ func main() {
 	fmt.Println("execute after get users ---------------------------")
 
 	//if !utils.CheckVersionIsUpToDate(2) {
-	//upgrade.Start(userStorageManager.AccountManager)
-	upgrade_v3.Start(userStorageManager.AccountManager)
+	//upgrade.Start(applicationManager.AccountManager)
+	upgrade_v3.Start(applicationManager.AccountManager)
 	//}
 
 	ginInit()
 
-	assetHandler := handler.NewAssetHandler(userStorageManager)
+	assetHandler := handler.NewAssetHandler(applicationManager)
 	assetRoute(assetHandler)
 
-	albumHandler := handler.NewAlbumHandler(userStorageManager)
+	albumHandler := handler.NewAlbumHandler(applicationManager)
 	RegisterAlbumRoutes(albumHandler)
 
-	tripHandler := handler.NewTripHandler(userStorageManager)
+	tripHandler := handler.NewTripHandler(applicationManager)
 	tripRoute(tripHandler)
 
-	sharedAlbumHandler := handler.NewSharedAlbumHandler(userStorageManager)
+	sharedAlbumHandler := handler.NewSharedAlbumHandler(applicationManager)
 	sharedAlbumRoute(sharedAlbumHandler)
 
-	personHandler := handler.NewPersonsHandler(userStorageManager)
+	personHandler := handler.NewPersonsHandler(applicationManager)
 	personRoute(personHandler)
 
-	villageHandler := handler.NewVillageHandler(userStorageManager)
+	villageHandler := handler.NewVillageHandler(applicationManager)
 	villageRoute(villageHandler)
 
-	pinnedHandler := handler.NewPinnedHandler(userStorageManager)
+	pinnedHandler := handler.NewPinnedHandler(applicationManager)
 	pinnedRoute(pinnedHandler)
 
-	cameraHandler := handler.NewCameraHandler(userStorageManager)
+	cameraHandler := handler.NewCameraHandler(applicationManager)
 	cameraRoute(cameraHandler)
 
 	startServer(router)

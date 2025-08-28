@@ -2,13 +2,14 @@ package upgrade_v3
 
 import (
 	"fmt"
-	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
-	"github.com/mahdi-cpp/photokit/tools/exiftool"
-	"github.com/mahdi-cpp/photokit/tools/exiftool_v1"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
+	"github.com/mahdi-cpp/photokit/tools/exiftool"
+	"github.com/mahdi-cpp/photokit/tools/exiftool_v1"
 )
 
 func upgradePHAssets(userID string) error {
@@ -56,10 +57,10 @@ func upgradePHAssets(userID string) error {
 		asset := phasset.PHAsset{}
 		asset.ID = strings.Replace(image, ".jpg", "", 1)
 		asset.UserID = userID
-		asset.File.BaseURL = filepath.Join("com.helium.photos/users", asset.UserID, "assets")
+		asset.FileInfo.BaseURL = filepath.Join("com.iris.photos/users", asset.UserID, "assets")
 
-		asset.File.FileSize = metadata.FileSize
-		asset.File.FileType = metadata.FileType
+		asset.FileInfo.FileSize = metadata.FileSize
+		asset.FileInfo.FileType = metadata.FileType
 		asset.Image.Orientation = metadata.Orientation
 
 		asset.Camera.Make = metadata.Make
@@ -179,7 +180,7 @@ func upgradePHAssetsV3(userID string) error {
 		if file.IsDir() {
 			continue
 		}
-		if strings.HasSuffix(strings.ToLower(file.Name()), ".mp4") {
+		if strings.HasSuffix(strings.ToLower(file.Name()), ".jpg") {
 			images = append(images, file.Name())
 		}
 	}
@@ -198,22 +199,22 @@ func upgradePHAssetsV3(userID string) error {
 			continue
 		}
 
-		asset := PHAssetV3{
-			Camera: CameraInfo{},
+		asset := phasset.PHAsset{
+			Camera: phasset.CameraInfo{},
 		}
 		asset.UserID = userID
 
 		fmt.Println(fileInfos[0].Fields["FileSize"], "          ", fileInfos[0].Fields["FileName"])
 
-		asset.File.BaseURL = filepath.Join("com.helium.photos/users", asset.UserID, "assets")
+		asset.FileInfo.BaseURL = filepath.Join("com.iris.photos/users", asset.UserID, "assets")
 		if FileSize, ok := fileInfos[0].Fields["FileSize"].(string); ok {
-			asset.File.FileSize = FileSize
+			asset.FileInfo.FileSize = FileSize
 		}
 		if FileType, ok := fileInfos[0].Fields["FileType"].(string); ok {
-			asset.File.FileType = FileType
+			asset.FileInfo.FileType = FileType
 		}
 		if MimeType, ok := fileInfos[0].Fields["MIMEType"].(string); ok {
-			asset.File.MimeType = MimeType
+			asset.FileInfo.MimeType = MimeType
 		}
 
 		if FileType, ok := fileInfos[0].Fields["FileType"].(string); ok {
@@ -328,23 +329,23 @@ func processSingleImage(image string, userID string, metadataDir string) error {
 		DateTimeOriginal = time.Now()
 	}
 
-	asset := PHAssetV3{
+	asset := phasset.PHAsset{
 		ID:     strings.TrimSuffix(image, ".jpg"),
 		UserID: userID,
-		File: FileInfo{
-			BaseURL:  filepath.Join("com.helium.photos/users", userID, "assets"),
+		FileInfo: phasset.FileInfo{
+			BaseURL:  filepath.Join("com.iris.photos/users", userID, "assets"),
 			FileSize: metadata.FileSize,
 			FileType: metadata.FileType,
 		},
-		Image: ImageInfo{
+		Image: phasset.ImageInfo{
 			Orientation: metadata.Orientation,
 		},
-		Camera: CameraInfo{
+		Camera: phasset.CameraInfo{
 			Make:             metadata.Make,
 			Model:            metadata.Model,
 			DateTimeOriginal: DateTimeOriginal,
 		},
-		Video: VideoInfo{
+		Video: phasset.VideoInfo{
 			MediaDuration: "150",
 		},
 

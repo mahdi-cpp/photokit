@@ -1,8 +1,9 @@
 package phasset
 
 import (
-	"github.com/mahdi-cpp/api-go-pkg/update"
 	"time"
+
+	"github.com/mahdi-cpp/api-go-pkg/update"
 )
 
 // Initialize updater
@@ -12,8 +13,8 @@ func init() {
 
 	// Configure scalar field updates
 	metadataUpdater.AddScalarUpdater(func(a *PHAsset, u UpdateOptions) {
-		if u.FileName != "" {
-			a.FileName = u.FileName
+		if u.FileType != "" {
+			a.FileInfo.FileType = u.FileType
 		}
 	})
 

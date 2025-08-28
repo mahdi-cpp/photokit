@@ -2,12 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/mahdi-cpp/go-account-service/account"
-	"github.com/mahdi-cpp/photokit/internal/application"
-	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/application"
+	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,8 +41,10 @@ func (handler *AssetHandler) Upload(c *gin.Context) {
 
 	// Handler person_test metadata
 	asset := &phasset.PHAsset{
-		UserID:   userID,
-		FileName: header.Filename,
+		UserID: userID,
+		FileInfo: phasset.FileInfo{
+			FileType: header.Filename,
+		},
 	}
 
 	//userManager, err := handler.manager.GetUserManager(c, userID)
@@ -184,7 +187,7 @@ func (handler *AssetHandler) Search(c *gin.Context) {
 	}
 
 	query := c.Query("query")
-	mediaType := c.Query("type")
+	//mediaType := c.Query("type")
 
 	var dateRange []time.Time
 	if start := c.Query("start"); start != "" {
@@ -201,7 +204,7 @@ func (handler *AssetHandler) Search(c *gin.Context) {
 	filters := phasset.SearchOptions{
 		UserID:    userID,
 		TextQuery: query,
-		MediaType: phasset.MediaType(mediaType),
+		//MediaType: phasset.MediaType(mediaType),
 	}
 
 	if len(dateRange) > 0 {

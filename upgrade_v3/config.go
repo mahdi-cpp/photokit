@@ -1,9 +1,10 @@
 package upgrade_v3
 
-var usersDir = "/media/mahdi/happle/cloud/com.helium.photos/users"
-var assetsDir = "/media/mahdi/happle/cloud/com.helium.photos/users/018fe65d-8e4a-74b0-8001-c8a7c29367e1/assets"
-var thumbnailsDir = "/media/mahdi/happle/cloud/com.helium.photos/users/018fe65d-8e4a-74b0-8001-c8a7c29367e1/thumbnails"
-var metadatasDir = "/media/mahdi/happle/cloud/com.helium.photos/users/018fe65d-8e4a-74b0-8001-c8a7c29367e1/metadatas"
+var usersDir = "/app/iris/com.iris.photos/users"
+var assetsDir = "/app/iris/com.iris.photos/users/018f3a8b-1b32-729a-f7e5-5467c1b2d3e4/assets"
+
+var thumbnailsDir = "/app/iris/com.iris.photos/users/018f3a8b-1b32-729a-f7e5-5467c1b2d3e4/thumbnails"
+var metadatasDir = "/app/iris/com.iris.photos/users/018f3a8b-1b32-729a-f7e5-5467c1b2d3e4/metadatas"
 
 const (
 	currentVersion = "v1"

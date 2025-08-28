@@ -20,7 +20,8 @@ func CreateDirectory(dirPath string) error {
 	// Permissions are the same as for os.Mkdir.
 	err := os.MkdirAll(nestedDirPath, 0755)
 	if err != nil {
-		log.Fatalf("Error creating nested directories %s: %v\n", nestedDirPath, err)
+		log.Printf("Error creating nested directories %s: %v\n", nestedDirPath, err)
+		return err
 	}
 	fmt.Printf("Nested directories '%s' created successfully (or already existed).\n", nestedDirPath)
 

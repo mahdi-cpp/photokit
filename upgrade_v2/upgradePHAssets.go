@@ -40,7 +40,7 @@ func upgradePHAssets(userID string, albumArrayV1 []*AlbumV1, tripArrayV1 []*Trip
 
 		itemArrayV2[i].FileName = itemArrayV1[i].Filename
 		itemArrayV2[i].FilePath = itemArrayV1[i].Filepath
-		itemArrayV2[i].BaseURL = filepath.Join("com.helium.photos/users", itemArrayV2[i].UserID, "assets")
+		itemArrayV2[i].BaseURL = filepath.Join("com.iris.photos/users", itemArrayV2[i].UserID, "assets")
 		//itemArrayV2[i].Url = itemArrayV2[i].ID + ".jpg"
 
 		if itemArrayV1[i].Albums != nil {

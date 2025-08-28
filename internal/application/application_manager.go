@@ -3,12 +3,13 @@ package application
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/redis/go-redis/v9"
 )
 
 type AppManager struct {

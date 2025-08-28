@@ -64,7 +64,7 @@ func Start(accountManager *account.ClientManager) {
 		log.Fatalf("pins upgrade_v2 failed: %v", err)
 	}
 
-	_, err = upgradePHAssets("018fe65d-8e4a-74b0-8001-c8a7c29367e1", albumArrayV1, tripArrayV1, personArrayV1)
+	_, err = upgradePHAssets("018f3a8b-1b32-729a-f7e5-5467c1b2d3e4", albumArrayV1, tripArrayV1, personArrayV1)
 	if err != nil {
 		log.Fatalf("PHAsset upgrade_v2 failed: %v", err)
 	}

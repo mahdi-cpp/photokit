@@ -29,7 +29,7 @@ type ImageMetadata struct {
 // Create generates thumbnails for all JPEG images in a user's asset directory
 func Create(userID string) error {
 
-	basePath := filepath.Join("/media/mahdi/happle/cloud/com.helium.photos/users", userID, "assets")
+	basePath := filepath.Join("/app/iris/com.iris.photos/users", userID, "assets")
 	thumbPath := filepath.Join(basePath, thumbnailsDir)
 
 	// Create thumbnails directory if it doesn't exist

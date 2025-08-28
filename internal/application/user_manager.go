@@ -3,6 +3,11 @@ package application
 import (
 	"context"
 	"fmt"
+	_ "image/jpeg"
+	_ "image/png"
+	"sync"
+	"time"
+
 	"github.com/mahdi-cpp/api-go-pkg/collection_manager_uuid7"
 	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/config"
@@ -16,13 +21,9 @@ import (
 	"github.com/mahdi-cpp/photokit/internal/collections/trip"
 	"github.com/mahdi-cpp/photokit/internal/collections/village"
 	"github.com/mahdi-cpp/photokit/internal/utils"
-	_ "image/jpeg"
-	_ "image/png"
-	"sync"
-	"time"
 )
 
-var mahdiUserID = "018fe65d-8e4a-74b0-8001-c8a7c29367e1"
+var mahdiUserID = "018f3a8b-1b32-729a-f7e5-5467c1b2d3e4"
 
 type PhotoAssetCollection[T collection_manager_uuid7.CollectionItem] struct {
 	Collection     *collection_manager_uuid7.Manager[T]
@@ -234,24 +235,24 @@ func (m *UserManager) prepareCameras() {
 	}
 
 	for _, phAsset := range assets {
-		if phAsset.CameraModel == "" {
+		if phAsset.Camera.Model == "" {
 			continue
 		}
 
-		cameraManager, exists := m.cameras[phAsset.CameraModel]
+		cameraManager, exists := m.cameras[phAsset.Camera.Model]
 		if exists {
 			cameraManager.Item.Count = cameraManager.Item.Count + 1
-			m.cameras[phAsset.CameraModel] = cameraManager
+			m.cameras[phAsset.Camera.Model] = cameraManager
 		} else {
 			collection := &asset.PHCollection[camera.Camera]{
 				Item: camera.Camera{
 					ID:          "1",
-					CameraMake:  phAsset.CameraMake,
-					CameraModel: phAsset.CameraModel,
+					CameraMake:  phAsset.Camera.Make,
+					CameraModel: phAsset.Camera.Model,
 					Count:       1},
 			}
 			//fmt.Println(collection)
-			m.cameras[phAsset.CameraModel] = collection
+			m.cameras[phAsset.Camera.Model] = collection
 		}
 	}
 
@@ -313,7 +314,7 @@ func (m *UserManager) preparePinned() {
 			break
 		case "video":
 			with = &phasset.SearchOptions{
-				MediaType: "video",
+				MimeType:  "video/mp4",
 				SortBy:    "createdAt",
 				SortOrder: "start",
 				Limit:     1,
@@ -321,7 +322,13 @@ func (m *UserManager) preparePinned() {
 			break
 		case "map":
 			var assets []*phasset.PHAsset
-			asset := phasset.PHAsset{ID: "12", MediaType: "image", BaseURL: "map", FileName: "map"}
+			asset := phasset.PHAsset{
+				ID: "12",
+				FileInfo: phasset.FileInfo{
+					BaseURL:  "map",
+					FileType: "map",
+				},
+			}
 			assets = append(assets, &asset)
 			m.collection.Pinned.PhotoAssetList[item.ID] = assets
 			break

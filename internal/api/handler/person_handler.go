@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/person"
 	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
-	"net/http"
 )
 
 type PersonHandler struct {
@@ -57,10 +58,10 @@ func (handler *PersonHandler) Create(c *gin.Context) {
 
 	userManager.UpdateCollections()
 
-	c.JSON(http.StatusCreated, CollectionResponse{
-		ID:    newItem.ID,
-		Title: newItem.Title,
-	})
+	//c.JSON(http.StatusCreated, CollectionResponse{
+	//	ID:    newItem.ID,
+	//	Title: newItem.Title,
+	//})
 }
 
 func (handler *PersonHandler) Update(c *gin.Context) {
