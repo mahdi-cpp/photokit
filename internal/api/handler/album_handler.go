@@ -39,6 +39,7 @@ func (handler *AlbumHandler) Create(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	newItem, err := userManager.GetCollections().Album.Collection.Create(&album.Album{Title: request.Title})
@@ -87,6 +88,7 @@ func (handler *AlbumHandler) Update(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	item, err := userManager.GetCollections().Album.Collection.Get(updateOptions.ID)
@@ -122,6 +124,7 @@ func (handler *AlbumHandler) Delete(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	err = userManager.GetCollections().Album.Collection.Delete(item.ID)
@@ -144,6 +147,7 @@ func (handler *AlbumHandler) GetAll(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	items, err := userManager.GetCollections().Album.Collection.GetAll()
@@ -185,6 +189,7 @@ func (handler *AlbumHandler) GetBySearchOptions(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	items, err := userManager.GetCollections().Album.Collection.GetAll()

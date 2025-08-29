@@ -1,6 +1,9 @@
-package metadatas
+package metadata
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // VideoMetadata struct for holding important video information
 type VideoMetadata struct {

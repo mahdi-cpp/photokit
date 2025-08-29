@@ -1,5 +1,3 @@
-
-
 ```file.go
 AlbumManager, err = collection.NewCollectionManager[*model.Album]("albums.json", false)
 AlbumManager, err = collection.NewCollectionManager[*model.Album]("albums_directory", false)
@@ -12,12 +10,11 @@ albums_directory
 
 albums_directory/
 ├── 1/
-│   └── metadata.json
+│ └── metadata.json
 ├── 2/
-│   └── metadata.json
+│ └── metadata.json
 └── 3/
 └── metadata.json
-
 
 albums_directory/
 ├── 1.json

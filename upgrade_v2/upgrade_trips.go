@@ -3,18 +3,19 @@ package upgrade
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func upgradeTrips() ([]*TripV1, error) {
 
 	const directoryName = "trips"
 
-	itemFile := filepath.Join(metadatasDir, currentVersion, "trips.json")
+	itemFile := filepath.Join(metadataDir, currentVersion, "trips.json")
 
 	// Read V1 data
 	data, err := os.ReadFile(itemFile)
@@ -54,7 +55,7 @@ func upgradeTrips() ([]*TripV1, error) {
 		index++
 	}
 
-	m := filepath.Join(metadatasDir, newVersion, directoryName)
+	m := filepath.Join(metadataDir, newVersion, directoryName)
 	err = CreateDirectory(m)
 	if err != nil {
 		return nil, err

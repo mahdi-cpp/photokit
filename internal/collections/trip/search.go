@@ -1,11 +1,14 @@
 package trip
 
 import (
-	"github.com/mahdi-cpp/api-go-pkg/search"
 	"strings"
+
+	"github.com/mahdi-cpp/api-go-pkg/search"
 )
 
-var LessFuncs = map[string]search.LessFunction[*Trip]{
+const MaxLimit = 1000
+
+var LessFunks = map[string]search.LessFunction[*Trip]{
 	"id":        func(a, b *Trip) bool { return a.ID < b.ID },
 	"createdAt": func(a, b *Trip) bool { return a.CreatedAt.Before(b.CreatedAt) },
 	"updatedAt": func(a, b *Trip) bool { return a.UpdatedAt.Before(b.UpdatedAt) },
@@ -13,7 +16,7 @@ var LessFuncs = map[string]search.LessFunction[*Trip]{
 
 func GetLessFunc(sortBy, sortOrder string) search.LessFunction[*Trip] {
 
-	fn, exists := LessFuncs[sortBy]
+	fn, exists := LessFunks[sortBy]
 	if !exists {
 		return nil
 	}
@@ -74,6 +77,10 @@ func Search(chats []*Trip, with SearchOptions) []*Trip {
 	final := make([]*Trip, len(results))
 	for i, item := range results {
 		final[i] = item.Value
+	}
+
+	if with.Limit == 0 { // if not set default is MAX_LIMIT
+		with.Limit = MaxLimit
 	}
 
 	// Apply pagination

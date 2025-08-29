@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/shared_album"
-	"net/http"
 )
 
 type SharedAlbumHandler struct {

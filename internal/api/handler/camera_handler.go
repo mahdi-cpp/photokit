@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	asset "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/camera"
-	"net/http"
 )
 
 type CameraHandler struct {
@@ -131,8 +132,8 @@ func (handler *CameraHandler) GetList(c *gin.Context) {
 
 	var a []*asset.PHCollection[camera.Camera]
 	result := userManager.GetAllCameras()
-	for _, camera := range result {
-		a = append(a, camera)
+	for _, camera1 := range result {
+		a = append(a, camera1)
 	}
 
 	//result := model.PHCollectionList[*model.Camera]{

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ var port = 50101
 var router *gin.Engine
 
 func ginInit() {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	router = gin.Default() // Initialize the Gin engine with default middleware
 
 	// Configure CORS middleware
@@ -45,7 +46,7 @@ func startServer(router *gin.Engine) {
 	// Run server in a goroutine
 	go func() {
 		log.Printf("Server starting on %s", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Server failed: %v", err)
 		}
 	}()

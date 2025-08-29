@@ -3,7 +3,6 @@ package upgrade_v3
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
@@ -129,12 +128,12 @@ func copyMatchingFields(dst, src interface{}) {
 
 // ============== HELPER FUNCTIONS ==============
 func backupFile(path string) error {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
 	backupPath := fmt.Sprintf("%s.%s.bak", path, time.Now().Format("20060102-150405"))
-	return ioutil.WriteFile(backupPath, data, 0644)
+	return os.WriteFile(backupPath, data, 0644)
 }
 
 func intSliceToStrSlice(nums []int) []string {
@@ -146,15 +145,22 @@ func intSliceToStrSlice(nums []int) []string {
 }
 
 func writeFile(path string, data []byte) error {
-	tmpFile, err := ioutil.TempFile("", "upgrade_v2-*.json")
+	tmpFile, err := os.CreateTemp("", "upgrade_v2-*.json")
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmpFile.Name())
+	//defer os.Remove(tmpFile.Name())
+
+	defer func() {
+		// Explicitly ignore the error returned by os.Remove
+		_ = os.Remove(tmpFile.Name())
+	}()
 
 	if _, err := tmpFile.Write(data); err != nil {
-		tmpFile.Close()
-		return err
+		err := tmpFile.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := tmpFile.Close(); err != nil {

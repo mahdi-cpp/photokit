@@ -2,9 +2,10 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/mahdi-cpp/go-account-service/account"
 	"log"
 	"path/filepath"
+
+	"github.com/mahdi-cpp/go-account-service/account"
 )
 
 func StartRename(accountManager *account.ClientManager) {
@@ -37,7 +38,7 @@ func StartRename(accountManager *account.ClientManager) {
 
 func Start(accountManager *account.ClientManager) {
 
-	dirToDelete := filepath.Join(metadatasDir, newVersion)
+	dirToDelete := filepath.Join(metadataDir, newVersion)
 	err := DeleteNestedDirectory(dirToDelete)
 	if err != nil {
 		log.Fatalf("Error deleting directory '%s': %v", dirToDelete, err)

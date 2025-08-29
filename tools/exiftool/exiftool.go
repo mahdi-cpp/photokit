@@ -25,10 +25,10 @@ var readyTokenLen = len(readyToken)
 // WaitTimeout specifies the duration to wait for exiftool_v1 to exit when closing before timing out
 var WaitTimeout = time.Second
 
-// ErrNotExist is a sentinel error for non existing file
+// ErrNotExist is a sentinel error for non-existing file
 var ErrNotExist = errors.New("file does not exist")
 
-// ErrNotFile is a sentinel error that is returned when a folder is provided instead of a rerular file
+// ErrNotFile is a sentinel error that is returned when a folder is provided instead of a regular file
 var ErrNotFile = errors.New("can't extract metadata from folder")
 
 // ErrBufferTooSmall is a sentinel error that is returned when the buffer used to store Exiftool's output is too small.
@@ -51,7 +51,7 @@ type Exiftool struct {
 }
 
 // NewExiftool instanciates a new Exiftool with configuration functions. If anything went
-// wrong, a non empty error will be returned.
+// wrong, a non-empty error will be returned.
 func NewExiftool(opts ...func(*Exiftool) error) (*Exiftool, error) {
 	e := Exiftool{
 		exiftoolBinPath: exiftoolBinary,
@@ -94,7 +94,7 @@ func NewExiftool(opts ...func(*Exiftool) error) (*Exiftool, error) {
 	return &e, nil
 }
 
-// Close closes exiftool_v1. If anything went wrong, a non empty error will be returned
+// Close closes exiftool_v1. If anything went wrong, a non-empty error will be returned
 func (e *Exiftool) Close() error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
@@ -130,7 +130,7 @@ func (e *Exiftool) Close() error {
 	select {
 	case <-ch:
 	case <-time.After(WaitTimeout):
-		errs = append(errs, errors.New("Timed out waiting for exiftool_v1 to exit"))
+		errs = append(errs, errors.New("timed out waiting for exiftool_v1 to exit"))
 	}
 
 	if len(errs) > 0 {
@@ -289,7 +289,7 @@ func (e *Exiftool) WriteMetadata(fileMetadata []FileMetadata) {
 		}
 
 		if err := handleWriteMetadataResponse(e.scanMergedOut.Text()); err != nil {
-			fileMetadata[i].Err = fmt.Errorf("Error writing metadata: %w", err)
+			fileMetadata[i].Err = fmt.Errorf("error writing metadata: %w", err)
 			continue
 		}
 	}
@@ -362,7 +362,7 @@ func NoPrintConversion() func(*Exiftool) error {
 	}
 }
 
-// ExtractEmbedded extracts embedded metadata from files (activates Exiftool's '-ee' paramater)
+// ExtractEmbedded extracts embedded metadata from files (activates Exiftool's '-ee' parameter)
 // Sample :
 //
 //	e, err := NewExiftool(ExtractEmbedded())
@@ -373,7 +373,7 @@ func ExtractEmbedded() func(*Exiftool) error {
 	}
 }
 
-// ExtractAllBinaryMetadata extracts all binary metadata (activates Exiftool's '-b' paramater)
+// ExtractAllBinaryMetadata extracts all binary metadata (activates Exiftool's '-b' parameter)
 // Sample :
 //
 //	e, err := NewExiftool(ExtractAllBinaryMetadata())

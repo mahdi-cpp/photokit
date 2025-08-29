@@ -1,6 +1,7 @@
 package main
 
 func main() {
+
 	//thumbnail_v2.Create("018f3a8b-1b32-729a-f7e5-5467c1b2d3e4")
 
 	//metadata, err := exiftool_v1.Start("/app/iris/com.iris.photos/users/assets/0198c111-0fe1-7e2d-b38b-62b1a1d89907.jpg")

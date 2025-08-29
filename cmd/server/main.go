@@ -7,7 +7,6 @@ import (
 
 	"github.com/mahdi-cpp/photokit/internal/api/handler"
 	"github.com/mahdi-cpp/photokit/internal/application"
-	"github.com/mahdi-cpp/photokit/upgrade_v3"
 )
 
 func main() {
@@ -27,7 +26,7 @@ func main() {
 
 	//if !utils.CheckVersionIsUpToDate(2) {
 	//upgrade.Start(applicationManager.AccountManager)
-	upgrade_v3.Start(applicationManager.AccountManager)
+	//upgrade_v3.Start(applicationManager.AccountManager)
 	//}
 
 	ginInit()

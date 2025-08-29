@@ -6,7 +6,9 @@ import (
 	"github.com/mahdi-cpp/api-go-pkg/search"
 )
 
-var LessFuncs = map[string]search.LessFunction[*PHAsset]{
+const MaxLimit = 1000
+
+var LessFunks = map[string]search.LessFunction[*PHAsset]{
 	"id":        func(a, b *PHAsset) bool { return a.ID < b.ID },
 	"createdAt": func(a, b *PHAsset) bool { return a.CreatedAt.Before(b.CreatedAt) },
 	"updatedAt": func(a, b *PHAsset) bool { return a.UpdatedAt.Before(b.UpdatedAt) },
@@ -14,7 +16,7 @@ var LessFuncs = map[string]search.LessFunction[*PHAsset]{
 
 func GetLessFunc(sortBy, sortOrder string) search.LessFunction[*PHAsset] {
 
-	fn, exists := LessFuncs[sortBy]
+	fn, exists := LessFunks[sortBy]
 	if !exists {
 		return nil
 	}
@@ -129,6 +131,10 @@ func Search(chats []*PHAsset, with *SearchOptions) []*PHAsset {
 	final := make([]*PHAsset, len(results))
 	for i, item := range results {
 		final[i] = item.Value
+	}
+
+	if with.Limit == 0 { // if not set default is MAX_LIMIT
+		with.Limit = MaxLimit
 	}
 
 	// Apply pagination

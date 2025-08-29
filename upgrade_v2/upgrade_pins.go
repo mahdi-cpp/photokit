@@ -3,18 +3,19 @@ package upgrade
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func upgradePins() ([]*PinnedV1, error) {
 
 	const directoryName = "pins"
 
-	itemFile := filepath.Join(metadatasDir, currentVersion, "pinned.json")
+	itemFile := filepath.Join(metadataDir, currentVersion, "pinned.json")
 
 	// Read V1 data
 	data, err := os.ReadFile(itemFile)
@@ -56,7 +57,7 @@ func upgradePins() ([]*PinnedV1, error) {
 		index++
 	}
 
-	m := filepath.Join(metadatasDir, newVersion, directoryName)
+	m := filepath.Join(metadataDir, newVersion, directoryName)
 	err = CreateDirectory(m)
 	if err != nil {
 		return nil, err

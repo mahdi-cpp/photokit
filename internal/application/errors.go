@@ -77,14 +77,14 @@ var (
 		HTTPStatus: http.StatusUnauthorized,
 	}
 
-	// 403 Forbidden
+	// ErrForbidden 403 Forbidden
 	ErrForbidden = &AppError{
 		Code:       ErrCodeForbidden,
 		Message:    "You don't have permission to access this resource",
 		HTTPStatus: http.StatusForbidden,
 	}
 
-	// 404 Not Found
+	// ErrAssetNotFound 404 Not Found
 	ErrAssetNotFound = &AppError{
 		Code:       ErrCodeNotFound,
 		Message:    "Asset not found",
@@ -97,42 +97,42 @@ var (
 		HTTPStatus: http.StatusNotFound,
 	}
 
-	// 409 Conflict
+	// ErrAssetConflict 409 Conflict
 	ErrAssetConflict = &AppError{
 		Code:       ErrCodeConflict,
 		Message:    "Asset already exists",
 		HTTPStatus: http.StatusConflict,
 	}
 
-	// 422 Unprocessable Entity
+	// ErrValidationFailed 422 Unprocessable Entity
 	ErrValidationFailed = &AppError{
 		Code:       ErrCodeValidation,
 		Message:    "Validation failed",
 		HTTPStatus: http.StatusUnprocessableEntity,
 	}
 
-	// 429 Too Many Requests
+	// ErrRateLimited 429 Too Many Requests
 	ErrRateLimited = &AppError{
 		Code:       ErrCodeRateLimited,
 		Message:    "Too many requests",
 		HTTPStatus: http.StatusTooManyRequests,
 	}
 
-	// 500 Internal Server Error
+	// ErrInternal 500 Internal Server Error
 	ErrInternal = &AppError{
 		Code:       ErrCodeInternal,
 		Message:    "Internal server error",
 		HTTPStatus: http.StatusInternalServerError,
 	}
 
-	// 501 Not Implemented
+	// ErrNotImplemented 501 Not Implemented
 	ErrNotImplemented = &AppError{
 		Code:       ErrCodeNotImplemented,
 		Message:    "Feature not implemented",
 		HTTPStatus: http.StatusNotImplemented,
 	}
 
-	// 503 Service Unavailable
+	// ErrServiceUnavailable 503 Service Unavailable
 	ErrServiceUnavailable = &AppError{
 		Code:       ErrCodeServiceUnavailable,
 		Message:    "Service temporarily unavailable",
@@ -161,7 +161,7 @@ var (
 	}
 )
 
-// Error helpers
+// NewValidationError Error helpers
 func NewValidationError(field, message string) *AppError {
 	return ErrValidationFailed.WithDetails(map[string]string{
 		"field":   field,

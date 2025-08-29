@@ -165,7 +165,7 @@ func (fm FileMetadata) Clear(k string) {
 	fm.set(k, nil)
 }
 
-// ClearAll removes all medatadata
+// ClearAll removes all metadata
 func (fm FileMetadata) ClearAll() {
 	for k, _ := range fm.Fields {
 		fm.set(k, nil)

@@ -1,11 +1,14 @@
 package person
 
 import (
-	"github.com/mahdi-cpp/api-go-pkg/search"
 	"strings"
+
+	"github.com/mahdi-cpp/api-go-pkg/search"
 )
 
-var LessFuncs = map[string]search.LessFunction[*Person]{
+const MaxLimit = 1000
+
+var LessFunks = map[string]search.LessFunction[*Person]{
 	"id":        func(a, b *Person) bool { return a.ID < b.ID },
 	"createdAt": func(a, b *Person) bool { return a.CreatedAt.Before(b.CreatedAt) },
 	"updatedAt": func(a, b *Person) bool { return a.UpdatedAt.Before(b.UpdatedAt) },
@@ -13,7 +16,7 @@ var LessFuncs = map[string]search.LessFunction[*Person]{
 
 func GetLessFunc(sortBy, sortOrder string) search.LessFunction[*Person] {
 
-	fn, exists := LessFuncs[sortBy]
+	fn, exists := LessFunks[sortBy]
 	if !exists {
 		return nil
 	}
@@ -74,6 +77,10 @@ func Search(chats []*Person, with SearchOptions) []*Person {
 	final := make([]*Person, len(results))
 	for i, item := range results {
 		final[i] = item.Value
+	}
+
+	if with.Limit == 0 { // if not set default is MAX_LIMIT
+		with.Limit = MaxLimit
 	}
 
 	// Apply pagination

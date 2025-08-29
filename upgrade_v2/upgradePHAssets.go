@@ -2,17 +2,18 @@ package upgrade
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"path/filepath"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func upgradePHAssets(userID string, albumArrayV1 []*AlbumV1, tripArrayV1 []*TripV1, personArrayV1 []*PersonV1) ([]*PHAssetV2, error) {
 
 	const directoryName = "assets"
 
-	dirPath := filepath.Join(metadatasDir, currentVersion, directoryName)
+	dirPath := filepath.Join(metadataDir, currentVersion, directoryName)
 
 	itemArrayV1, err := readJsonFilesFromDirectory(dirPath)
 	if err != nil {
@@ -84,7 +85,7 @@ func upgradePHAssets(userID string, albumArrayV1 []*AlbumV1, tripArrayV1 []*Trip
 		index++
 	}
 
-	m := filepath.Join(metadatasDir, newVersion, directoryName)
+	m := filepath.Join(metadataDir, newVersion, directoryName)
 	err = CreateDirectory(m)
 	if err != nil {
 		return nil, err

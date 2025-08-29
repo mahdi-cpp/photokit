@@ -1,8 +1,9 @@
 package pinned
 
 import (
-	"github.com/mahdi-cpp/api-go-pkg/update"
 	"time"
+
+	"github.com/mahdi-cpp/api-go-pkg/update"
 )
 
 // Initialize updater

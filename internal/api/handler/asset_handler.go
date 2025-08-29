@@ -37,7 +37,14 @@ func (handler *AssetHandler) Upload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload error"})
 		return
 	}
-	defer file.Close()
+	// Recommended: Log the error if the file can't be closed properly.
+	defer func() {
+		if err := file.Close(); err != nil {
+			// Here, you should log the error.
+			// For example, using the standard "log" package:
+			log.Printf("error closing file: %v", err)
+		}
+	}()
 
 	// Handler person_test metadata
 	asset := &phasset.PHAsset{
@@ -86,6 +93,7 @@ func (handler *AssetHandler) Update(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	asset, err := userManager.UpdateAssets(updateOptions)
@@ -121,6 +129,7 @@ func (handler *AssetHandler) UpdateAll(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	allAssets, err := userManager.GetAllAssets()
@@ -167,6 +176,7 @@ func (handler *AssetHandler) Get(c *gin.Context) {
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	asset, err := userManager.GetCollections().Assets.Get(userID)

@@ -150,14 +150,14 @@ func (manager *AppManager) periodicMaintenance() {
 	}
 }
 
-func (m *AppManager) initAccountOperations() {
-	defer m.wg.Done()
+func (manager *AppManager) initAccountOperations() {
+	defer manager.wg.Done()
 
 	// Request user list with retry logic
 	retryCount := 0
 	maxRetries := 3
 	for {
-		if err := m.AccountManager.RequestList(); err != nil {
+		if err := manager.AccountManager.RequestList(); err != nil {
 			log.Printf("Error requesting user list (attempt %d/%d): %v",
 				retryCount+1, maxRetries, err)
 
@@ -170,7 +170,7 @@ func (m *AppManager) initAccountOperations() {
 			// Wait before retrying
 			select {
 			case <-time.After(time.Duration(500*retryCount) * time.Millisecond):
-			case <-m.ctx.Done():
+			case <-manager.ctx.Done():
 				return
 			}
 			continue
@@ -179,13 +179,13 @@ func (m *AppManager) initAccountOperations() {
 	}
 
 	// Start additional subscribers
-	m.AccountManager.StartSubscriber("account/notifications", "account/alerts")
+	manager.AccountManager.StartSubscriber("account/notifications", "account/alerts")
 }
 
-func (m *AppManager) accountCallback(msg *redis.Message) {
+func (manager *AppManager) accountCallback(msg *redis.Message) {
 	switch msg.Channel {
 	case "account/list":
-		m.processUserList()
+		manager.processUserList()
 	case "account/user":
 		// Handle individual user updates
 	case "account/notifications":
@@ -195,9 +195,9 @@ func (m *AppManager) accountCallback(msg *redis.Message) {
 	}
 }
 
-func (m *AppManager) processUserList() {
+func (manager *AppManager) processUserList() {
 	// Access Users in a thread-safe manner
-	users := m.AccountManager.Users // Assuming you add this method to account manager
+	users := manager.AccountManager.Users // Assuming you add this method to account manager
 
 	fmt.Println("")
 	log.Printf("Received user list update with %d Users", len(users))
@@ -218,24 +218,24 @@ func (m *AppManager) processUserList() {
 	}
 
 	for _, user := range users {
-		m.Users[user.ID] = user
+		manager.Users[user.ID] = user
 	}
 
 	// Signal that initial list is received (only once)
-	if !m.initialListReceived {
-		m.initialListReceived = true
-		close(m.initialUserList)
+	if !manager.initialListReceived {
+		manager.initialListReceived = true
+		close(manager.initialUserList)
 	}
 
 }
 
-func (m *AppManager) WaitForInitialUserList(timeout time.Duration) error {
+func (manager *AppManager) WaitForInitialUserList(timeout time.Duration) error {
 	select {
-	case <-m.initialUserList:
+	case <-manager.initialUserList:
 		return nil
 	case <-time.After(timeout):
 		return fmt.Errorf("timeout waiting for initial user list")
-	case <-m.ctx.Done():
+	case <-manager.ctx.Done():
 		return fmt.Errorf("context cancelled while waiting for user list")
 	}
 }

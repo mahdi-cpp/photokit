@@ -1,5 +1,5 @@
-
 ## Assets
+
 ```json
 [
   {
@@ -18,7 +18,6 @@
     "fetchOffset": 0,
     "fetchLimit": 10
   },
-
   {
     "assetIds": [
       50,
@@ -28,7 +27,6 @@
       1
     ]
   },
-
   {
     "assetIds": [
       21,
@@ -37,8 +35,6 @@
     "cameraMake": "Samsong",
     "cameraModel": "Galaxy A5"
   }
-  
-  
 ]
 ```
 
@@ -48,27 +44,31 @@ http://localhost:8080/api/v1/album/getList
 
 http://localhost:8080/api/v1/album/create
 
-
 ```json
 [
-  {"userID":4, "name":"ESP32", "albumType":"electronic", "isCollection":false}
+  {
+    "userID": 4,
+    "name": "ESP32",
+    "albumType": "electronic",
+    "isCollection": false
+  }
 ]
 ```
 
 ```json
 [
-{
-"name_fa": "دودهه", 
-"name_en": "Dodahe",
-"latitude": 35.3896,
-"longitude": 40.45789
-},
-{
-  "name_fa": "سیاه کلان",
-  "name_en": "Siahkolan",
-  "latitude": 35.3125,
-  "longitude": 40.4578
-}
+  {
+    "name_fa": "دودهه",
+    "name_en": "Dodahe",
+    "latitude": 35.3896,
+    "longitude": 40.45789
+  },
+  {
+    "name_fa": "سیاه کلان",
+    "name_en": "Siahkolan",
+    "latitude": 35.3125,
+    "longitude": 40.4578
+  }
 ]
 ```
 

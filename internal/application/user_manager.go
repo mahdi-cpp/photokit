@@ -11,6 +11,7 @@ import (
 	"github.com/mahdi-cpp/api-go-pkg/collection_manager_uuid7"
 	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/config"
+	"github.com/mahdi-cpp/photokit/internal/collection_manager_v3"
 	asset "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/album"
 	"github.com/mahdi-cpp/photokit/internal/collections/camera"
@@ -46,7 +47,7 @@ func NewPhotoAssetCollection[T collection_manager_uuid7.CollectionItem](path str
 }
 
 type Collection struct {
-	Assets       *collection_manager_uuid7.Manager[*phasset.PHAsset]
+	Assets       *collection_manager_v3.Manager[*phasset.PHAsset]
 	Album        *PhotoAssetCollection[*album.Album]
 	Trips        *PhotoAssetCollection[*trip.Trip]
 	Persons      *PhotoAssetCollection[*person.Person]
@@ -88,17 +89,23 @@ func NewUserManager(user *account.User) (*UserManager, error) {
 	}
 
 	var err error
-	userManager.collection.Assets, err = collection_manager_uuid7.NewCollectionManager[*phasset.PHAsset](config.GetUserPath(user.ID, "metadatas/v2/assets"), false)
+	userManager.collection.Assets, err = collection_manager_v3.NewCollectionManager[*phasset.PHAsset](config.GetUserMetadataPath(user.ID, "assets"), true)
 	if err != nil {
 		panic(err)
 	}
 
-	userManager.collection.Album = NewPhotoAssetCollection[*album.Album](config.GetUserPath(user.ID, "metadatas/v2/albums"))
-	userManager.collection.SharedAlbums = NewPhotoAssetCollection[*shared_album.SharedAlbum](config.GetUserPath(user.ID, "metadatas/v2/albums"))
-	userManager.collection.Trips = NewPhotoAssetCollection[*trip.Trip](config.GetUserPath(user.ID, "metadatas/v2/trips"))
-	userManager.collection.Persons = NewPhotoAssetCollection[*person.Person](config.GetUserPath(user.ID, "metadatas/v2/persons"))
-	userManager.collection.Pinned = NewPhotoAssetCollection[*pinned.Pinned](config.GetUserPath(user.ID, "metadatas/v2/pins"))
-	userManager.collection.Villages = NewPhotoAssetCollection[*village.Village](config.GetPath("/metadatas/v2/villages"))
+	all, err := userManager.collection.Assets.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(len(all))
+
+	userManager.collection.Album = NewPhotoAssetCollection[*album.Album](config.GetUserMetadataPath(user.ID, "albums"))
+	userManager.collection.SharedAlbums = NewPhotoAssetCollection[*shared_album.SharedAlbum](config.GetUserMetadataPath(user.ID, "shared_albums"))
+	userManager.collection.Trips = NewPhotoAssetCollection[*trip.Trip](config.GetUserMetadataPath(user.ID, "trips"))
+	userManager.collection.Persons = NewPhotoAssetCollection[*person.Person](config.GetUserMetadataPath(user.ID, "persons"))
+	userManager.collection.Pinned = NewPhotoAssetCollection[*pinned.Pinned](config.GetUserMetadataPath(user.ID, "pins"))
+	userManager.collection.Villages = NewPhotoAssetCollection[*village.Village](config.GetUserMetadataPath(user.ID, "villages"))
 
 	userManager.prepareAlbums()
 	userManager.prepareTrips()
@@ -322,24 +329,24 @@ func (m *UserManager) preparePinned() {
 			break
 		case "map":
 			var assets []*phasset.PHAsset
-			asset := phasset.PHAsset{
+			asset1 := phasset.PHAsset{
 				ID: "12",
 				FileInfo: phasset.FileInfo{
 					BaseURL:  "map",
 					FileType: "map",
 				},
 			}
-			assets = append(assets, &asset)
+			assets = append(assets, &asset1)
 			m.collection.Pinned.PhotoAssetList[item.ID] = assets
 			break
 		case "album":
-			album, err := m.collection.Album.Collection.Get(item.AlbumID)
+			selectedAlbum, err := m.collection.Album.Collection.Get(item.AlbumID)
 			if err != nil {
 				continue
 			}
-			item.Title = album.Title
+			item.Title = selectedAlbum.Title
 			with = &phasset.SearchOptions{
-				Albums:    []string{album.ID},
+				Albums:    []string{selectedAlbum.ID},
 				SortBy:    "createdAt",
 				SortOrder: "start",
 				Limit:     1,

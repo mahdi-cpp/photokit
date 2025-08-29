@@ -2,6 +2,7 @@ package upgrade_v3
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,7 +50,7 @@ func upgradePHAssets(userID string) error {
 		metadata, err2 := exiftool_v1.Start(filepath.Join(assetsDir, image))
 		if err2 != nil {
 			// Log the error but continue to the next image
-			fmt.Printf("Exiftool error for image '%s': %v\n", image, err.Error())
+			fmt.Printf("Exiftool error for image '%s': %v\n", image, err)
 			continue // Move to the next image in the list
 		}
 
@@ -167,7 +168,15 @@ func upgradePHAssetsV3(userID string) error {
 		fmt.Printf("Error when intializing: %v\n", err)
 		return err
 	}
-	defer et.Close()
+
+	// Recommended: Log the error if the file can't be closed properly.
+	defer func() {
+		if err := et.Close(); err != nil {
+			// Here, you should log the error.
+			// For example, using the standard "log" package:
+			log.Printf("error closing file in upgradePHAssetsV3: %v", err)
+		}
+	}()
 
 	m := filepath.Join(metadatasDir, newVersion, directoryName) // create v3 directory
 	err = CreateDirectory(m)
@@ -320,6 +329,11 @@ func processSingleImage(image string, userID string, metadataDir string) error {
 	metadata, err := exiftool_v1.Start(filepath.Join(assetsDir, image))
 	if err != nil {
 		return fmt.Errorf("exiftool_v1 error: %w", err)
+	}
+
+	// Defensive check, usually redundant if API is well-behaved
+	if metadata == nil {
+		return fmt.Errorf("exiftool_v1 returned nil metadata but no error")
 	}
 
 	var DateTimeOriginal time.Time

@@ -1,11 +1,14 @@
 package shared_album
 
 import (
-	"github.com/mahdi-cpp/api-go-pkg/search"
 	"strings"
+
+	"github.com/mahdi-cpp/api-go-pkg/search"
 )
 
-var LessFuncs = map[string]search.LessFunction[*SharedAlbum]{
+const MaxLimit = 1000
+
+var LessFunks = map[string]search.LessFunction[*SharedAlbum]{
 	"id":        func(a, b *SharedAlbum) bool { return a.ID < b.ID },
 	"createdAt": func(a, b *SharedAlbum) bool { return a.CreatedAt.Before(b.CreatedAt) },
 	"updatedAt": func(a, b *SharedAlbum) bool { return a.UpdatedAt.Before(b.UpdatedAt) },
@@ -13,7 +16,7 @@ var LessFuncs = map[string]search.LessFunction[*SharedAlbum]{
 
 func GetLessFunc(sortBy, sortOrder string) search.LessFunction[*SharedAlbum] {
 
-	fn, exists := LessFuncs[sortBy]
+	fn, exists := LessFunks[sortBy]
 	if !exists {
 		return nil
 	}
@@ -74,6 +77,10 @@ func Search(chats []*SharedAlbum, with SearchOptions) []*SharedAlbum {
 	final := make([]*SharedAlbum, len(results))
 	for i, item := range results {
 		final[i] = item.Value
+	}
+
+	if with.Limit == 0 { // if not set default is MAX_LIMIT
+		with.Limit = MaxLimit
 	}
 
 	// Apply pagination
