@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	asset "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/village"
+	"github.com/mahdi-cpp/photokit/internal/helpers"
 )
 
 type VillageHandler struct {
@@ -23,9 +23,9 @@ func NewVillageHandler(manager *application.AppManager) *VillageHandler {
 
 func (handler *VillageHandler) GetList(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 

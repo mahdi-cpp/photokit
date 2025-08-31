@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/mahdi-cpp/api-go-pkg/collection_manager_uuid7"
-	"github.com/mahdi-cpp/go-account-service/account"
+
 	"github.com/mahdi-cpp/photokit/config"
 	"github.com/mahdi-cpp/photokit/internal/collection_manager_v3"
 	asset "github.com/mahdi-cpp/photokit/internal/collections"
@@ -23,8 +23,6 @@ import (
 	"github.com/mahdi-cpp/photokit/internal/collections/village"
 	"github.com/mahdi-cpp/photokit/internal/utils"
 )
-
-var mahdiUserID = "018f3a8b-1b32-729a-f7e5-5467c1b2d3e4"
 
 type PhotoAssetCollection[T collection_manager_uuid7.CollectionItem] struct {
 	Collection     *collection_manager_uuid7.Manager[T]

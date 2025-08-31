@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/helpers"
+
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/album"
@@ -16,6 +16,11 @@ type AlbumHandler struct {
 	manager *application.AppManager
 }
 
+type CollectionResponse struct {
+	ID    string `json:"id"`
+	Title string `json:"name"`
+}
+
 func NewAlbumHandler(manager *application.AppManager) *AlbumHandler {
 	return &AlbumHandler{
 		manager: manager,
@@ -24,15 +29,15 @@ func NewAlbumHandler(manager *application.AppManager) *AlbumHandler {
 
 func (handler *AlbumHandler) Create(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var request collection.CollectionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -66,22 +71,17 @@ func (handler *AlbumHandler) Create(c *gin.Context) {
 	})
 }
 
-type CollectionResponse struct {
-	ID    string `json:"id"`
-	Title string `json:"name"`
-}
-
 func (handler *AlbumHandler) Update(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var updateOptions album.UpdateOptions
 	if err := c.ShouldBindJSON(&updateOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -109,15 +109,15 @@ func (handler *AlbumHandler) Update(c *gin.Context) {
 
 func (handler *AlbumHandler) Delete(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var item album.Album
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -138,9 +138,9 @@ func (handler *AlbumHandler) Delete(c *gin.Context) {
 
 func (handler *AlbumHandler) GetAll(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
@@ -173,16 +173,15 @@ func (handler *AlbumHandler) GetAll(c *gin.Context) {
 
 func (handler *AlbumHandler) GetBySearchOptions(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var searchOptions album.SearchOptions
 	if err := c.ShouldBindJSON(&searchOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		fmt.Println("Invalid request")
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 

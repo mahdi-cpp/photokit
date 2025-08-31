@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
 	"github.com/mahdi-cpp/photokit/internal/collections/trip"
+	"github.com/mahdi-cpp/photokit/internal/helpers"
 )
 
 type TripHandler struct {
@@ -23,15 +23,15 @@ func NewTripHandler(manager *application.AppManager) *TripHandler {
 
 func (handler *TripHandler) Create(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var request collection.CollectionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -66,15 +66,15 @@ func (handler *TripHandler) Create(c *gin.Context) {
 
 func (handler *TripHandler) Update(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var updateOptions trip.UpdateOptions
 	if err := c.ShouldBindJSON(&updateOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -107,15 +107,15 @@ func (handler *TripHandler) Update(c *gin.Context) {
 
 func (handler *TripHandler) Delete(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var item trip.Trip
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -141,9 +141,9 @@ func (handler *TripHandler) Delete(c *gin.Context) {
 
 func (handler *TripHandler) GetCollectionList(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
@@ -177,9 +177,9 @@ func (handler *TripHandler) GetCollectionList(c *gin.Context) {
 
 func (handler *TripHandler) GetCollectionListWith(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 

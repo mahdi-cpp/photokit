@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-
-	"github.com/mahdi-cpp/go-account-service/account"
 )
 
 func StartRename(accountManager *account.ClientManager) {

@@ -22,6 +22,7 @@ func GetUserPath(phone string, file string) string {
 	fmt.Println(pp)
 	return pp
 }
+
 func GetUserMetadataPath(id string, directory string) string {
 	pp := filepath.Join(root, application, users, id, Metadata, Version, directory)
 	fmt.Println(pp)

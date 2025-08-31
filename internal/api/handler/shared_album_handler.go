@@ -4,7 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/helpers"
+
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/shared_album"
@@ -22,15 +23,15 @@ func NewSharedAlbumHandler(manager *application.AppManager) *SharedAlbumHandler 
 
 func (handler *SharedAlbumHandler) Create(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var item shared_album.SharedAlbum
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -50,15 +51,15 @@ func (handler *SharedAlbumHandler) Create(c *gin.Context) {
 
 func (handler *SharedAlbumHandler) Update(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var updateOptions shared_album.UpdateOptions
 	if err := c.ShouldBindJSON(&updateOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -85,15 +86,15 @@ func (handler *SharedAlbumHandler) Update(c *gin.Context) {
 
 func (handler *SharedAlbumHandler) Delete(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var item shared_album.SharedAlbum
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -113,9 +114,9 @@ func (handler *SharedAlbumHandler) Delete(c *gin.Context) {
 
 func (handler *SharedAlbumHandler) GetList(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 

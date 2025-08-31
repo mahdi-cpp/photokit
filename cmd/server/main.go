@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/mahdi-cpp/photokit/cmd/middelware"
 	"github.com/mahdi-cpp/photokit/internal/api/handler"
 	"github.com/mahdi-cpp/photokit/internal/application"
 )
@@ -61,6 +62,7 @@ func main() {
 func assetRoute(h *handler.AssetHandler) {
 
 	api := router.Group("/api/v1/assets")
+	api.Use(middelware.AuthMiddleware())
 
 	api.POST("thumbnail", h.Create)
 	api.POST("upload", h.Upload)

@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/gin-gonic/gin"
+
 	"github.com/mahdi-cpp/photokit/internal/application"
 	"github.com/mahdi-cpp/photokit/internal/collections/phasset"
-
-	"github.com/gin-gonic/gin"
+	"github.com/mahdi-cpp/photokit/internal/helpers"
 )
 
 type AssetHandler struct {
@@ -26,9 +26,9 @@ func (handler *AssetHandler) Create(c *gin.Context) {
 
 func (handler *AssetHandler) Upload(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
@@ -76,17 +76,15 @@ func (handler *AssetHandler) Upload(c *gin.Context) {
 
 func (handler *AssetHandler) Update(c *gin.Context) {
 
-	startTime := time.Now()
-
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var updateOptions phasset.UpdateOptions
 	if err := c.ShouldBindJSON(&updateOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -104,25 +102,19 @@ func (handler *AssetHandler) Update(c *gin.Context) {
 
 	userManager.UpdateCollections()
 
-	// Log performance
-	duration := time.Since(startTime)
-	log.Printf("Update: person_test count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
-
 	c.JSON(http.StatusCreated, asset)
 }
 
 func (handler *AssetHandler) UpdateAll(c *gin.Context) {
-	startTime := time.Now()
-
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var updateOptions phasset.UpdateOptions
 	if err := c.ShouldBindJSON(&updateOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -150,28 +142,16 @@ func (handler *AssetHandler) UpdateAll(c *gin.Context) {
 
 	userManager.UpdateCollections()
 
-	// Log performance
-	duration := time.Since(startTime)
-	log.Printf("Update: person_test count: %d,  (in %v)", len(updateOptions.AssetIds), duration)
-
 	c.JSON(http.StatusCreated, asset)
 }
 
 func (handler *AssetHandler) Get(c *gin.Context) {
 
-	userID := c.Query("userID")
-	//userID, err := strconv.Atoi(userID)
-	//if err != nil {
-	//	c.JSON(400, gin.H{"error": "userID must be an integer"})
-	//	return
-	//}
-
-	//id := c.Param("id")
-	//id, err := strconv.Atoi(c.Param("id"))
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
-	//	return
-	//}
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
+		return
+	}
 
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
@@ -190,9 +170,9 @@ func (handler *AssetHandler) Get(c *gin.Context) {
 
 func (handler *AssetHandler) Search(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
@@ -267,21 +247,18 @@ func (handler *AssetHandler) Delete(c *gin.Context) {
 
 func (handler *AssetHandler) Filters(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var with *phasset.SearchOptions
 	if err := c.ShouldBindJSON(&with); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		fmt.Println("Invalid request 5")
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
-	fmt.Println("userID: ", userID)
 	userManager, err := handler.manager.GetUserManager(c, userID)
 	if err != nil {
 		fmt.Println(err.Error())

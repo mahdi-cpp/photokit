@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
+
 	"github.com/redis/go-redis/v9"
 )
 
@@ -196,6 +196,7 @@ func (manager *AppManager) accountCallback(msg *redis.Message) {
 }
 
 func (manager *AppManager) processUserList() {
+
 	// Access Users in a thread-safe manner
 	users := manager.AccountManager.Users // Assuming you add this method to account manager
 

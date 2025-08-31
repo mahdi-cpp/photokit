@@ -5,7 +5,8 @@ import (
 	"sort"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mahdi-cpp/go-account-service/account"
+	"github.com/mahdi-cpp/photokit/internal/helpers"
+
 	"github.com/mahdi-cpp/photokit/internal/application"
 	collection "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/pinned"
@@ -23,15 +24,15 @@ func NewPinnedHandler(manager *application.AppManager) *PinnedHandler {
 
 func (handler *PinnedHandler) Create(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var item pinned.Pinned
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -51,15 +52,15 @@ func (handler *PinnedHandler) Create(c *gin.Context) {
 
 func (handler *PinnedHandler) Update(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var updateOptions pinned.UpdateOptions
 	if err := c.ShouldBindJSON(&updateOptions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -85,15 +86,15 @@ func (handler *PinnedHandler) Update(c *gin.Context) {
 
 func (handler *PinnedHandler) Delete(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
 	var item pinned.Pinned
 	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		helpers.AbortWithRequestInvalid(c)
 		return
 	}
 
@@ -113,9 +114,9 @@ func (handler *PinnedHandler) Delete(c *gin.Context) {
 
 func (handler *PinnedHandler) GetList(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
@@ -149,9 +150,9 @@ func (handler *PinnedHandler) GetList(c *gin.Context) {
 
 func (handler *PinnedHandler) GetCollectionListWith(c *gin.Context) {
 
-	userID, err := account.GetUserId(c)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "userID must be an integer"})
+	userID, ok := helpers.GetUserID(c)
+	if !ok {
+		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
 
