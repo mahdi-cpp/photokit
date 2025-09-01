@@ -3,20 +3,16 @@ package application
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type AppManager struct {
 	mu                  sync.RWMutex
-	Users               map[string]*account.User
+	Users               map[string]string
 	userManagers        map[string]*UserManager // Maps user IDs to their UserManager
-	AccountManager      *account.ClientManager
 	ctx                 context.Context
 	cancel              context.CancelFunc
 	wg                  sync.WaitGroup
@@ -31,27 +27,27 @@ func NewApplicationManager() (*AppManager, error) {
 
 	manager := &AppManager{
 		userManagers:    make(map[string]*UserManager),
-		Users:           make(map[string]*account.User),
+		Users:           make(map[string]string),
 		ctx:             ctx,
 		cancel:          cancel, // Store the cancel function
 		initialUserList: make(chan struct{}),
 	}
 
-	var err error
+	//var err error
 
-	// Initialize account manager
-	manager.AccountManager, err = account.NewClientManager()
-	if err != nil {
-		cancel()
-		return nil, fmt.Errorf("failed to initialize account manager: %w", err)
-	}
-
-	// Register callback
-	manager.AccountManager.Register(manager.accountCallback)
+	//// Initialize account manager
+	//manager.AccountManager, err = account.NewClientManager()
+	//if err != nil {
+	//	cancel()
+	//	return nil, fmt.Errorf("failed to initialize account manager: %w", err)
+	//}
+	//
+	//// Register callback
+	//manager.AccountManager.Register(manager.accountCallback)
 
 	// Start account operations in a separate goroutine
 	manager.wg.Add(1)
-	go manager.initAccountOperations()
+	//go manager.initAccountOperations()
 
 	return manager, nil
 }
@@ -87,9 +83,9 @@ func (manager *AppManager) GetUserManager(c *gin.Context, userID string) (*UserM
 	defer manager.mu.Unlock()
 
 	// Check if userStorage already exists for this user
-	if userManager, exists := manager.userManagers[userID]; exists {
-		return userManager, nil
-	}
+	//if userManager, exists := manager.userManagers[userID]; exists {
+	//	return userManager, nil
+	//}
 
 	createManager, err := manager.CreateManager(userID)
 	if err != nil {
@@ -101,13 +97,13 @@ func (manager *AppManager) GetUserManager(c *gin.Context, userID string) (*UserM
 
 func (manager *AppManager) CreateManager(userID string) (*UserManager, error) {
 
-	var user = manager.Users[userID]
-	if user == nil {
+	//var user = manager.Users[userID]
+	if userID == "" {
 		fmt.Println("user is nil")
 		return nil, fmt.Errorf("user not found")
 	}
 
-	userManager, err := NewUserManager(user)
+	userManager, err := NewUserManager(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -150,85 +146,86 @@ func (manager *AppManager) periodicMaintenance() {
 	}
 }
 
-func (manager *AppManager) initAccountOperations() {
-	defer manager.wg.Done()
+//
+//func (manager *AppManager) initAccountOperations() {
+//	defer manager.wg.Done()
+//
+//	// Request user list with retry logic
+//	retryCount := 0
+//	maxRetries := 3
+//	for {
+//		if err := manager.AccountManager.RequestList(); err != nil {
+//			log.Printf("Error requesting user list (attempt %d/%d): %v",
+//				retryCount+1, maxRetries, err)
+//
+//			retryCount++
+//			if retryCount >= maxRetries {
+//				log.Println("Failed to request user list after max retries")
+//				break
+//			}
+//
+//			// Wait before retrying
+//			select {
+//			case <-time.After(time.Duration(500*retryCount) * time.Millisecond):
+//			case <-manager.ctx.Done():
+//				return
+//			}
+//			continue
+//		}
+//		break
+//	}
+//
+//	// Start additional subscribers
+//	//manager.AccountManager.StartSubscriber("account/notifications", "account/alerts")
+//}
 
-	// Request user list with retry logic
-	retryCount := 0
-	maxRetries := 3
-	for {
-		if err := manager.AccountManager.RequestList(); err != nil {
-			log.Printf("Error requesting user list (attempt %d/%d): %v",
-				retryCount+1, maxRetries, err)
-
-			retryCount++
-			if retryCount >= maxRetries {
-				log.Println("Failed to request user list after max retries")
-				break
-			}
-
-			// Wait before retrying
-			select {
-			case <-time.After(time.Duration(500*retryCount) * time.Millisecond):
-			case <-manager.ctx.Done():
-				return
-			}
-			continue
-		}
-		break
-	}
-
-	// Start additional subscribers
-	manager.AccountManager.StartSubscriber("account/notifications", "account/alerts")
-}
-
-func (manager *AppManager) accountCallback(msg *redis.Message) {
-	switch msg.Channel {
-	case "account/list":
-		manager.processUserList()
-	case "account/user":
-		// Handle individual user updates
-	case "account/notifications":
-		// Handle notifications
-	case "account/alerts":
-		// Handle alerts
-	}
-}
-
-func (manager *AppManager) processUserList() {
-
-	// Access Users in a thread-safe manner
-	users := manager.AccountManager.Users // Assuming you add this method to account manager
-
-	fmt.Println("")
-	log.Printf("Received user list update with %d Users", len(users))
-
-	//Example processing - replace with your actual logic
-	//for _, user := range Users {
-	//	log.Printf("User: %s %s       (%s)",
-	//		user.FirstName, user.LastName, user.PhoneNumber)
-	//}
-
-	// Determine the maximum length for First Name + Last Name to ensure consistent spacing
-	// You might want to adjust this based on your expected data
-	const maxNameLength = 20 // Example: allocate 25 characters for first and last name combined
-
-	for _, user := range users {
-		fullName := fmt.Sprintf("   %s %s", user.FirstName, user.LastName)
-		log.Printf("%-*s  %s     %s", maxNameLength, fullName, user.PhoneNumber, user.ID)
-	}
-
-	for _, user := range users {
-		manager.Users[user.ID] = user
-	}
-
-	// Signal that initial list is received (only once)
-	if !manager.initialListReceived {
-		manager.initialListReceived = true
-		close(manager.initialUserList)
-	}
-
-}
+//func (manager *AppManager) accountCallback(msg *redis.Message) {
+//	switch msg.Channel {
+//	case "account/list":
+//		manager.processUserList()
+//	case "account/user":
+//		// Handle individual user updates
+//	case "account/notifications":
+//		// Handle notifications
+//	case "account/alerts":
+//		// Handle alerts
+//	}
+//}
+//
+//func (manager *AppManager) processUserList() {
+//
+//	// Access Users in a thread-safe manner
+//	users := manager.AccountManager.Users // Assuming you add this method to account manager
+//
+//	fmt.Println("")
+//	log.Printf("Received user list update with %d Users", len(users))
+//
+//	//Example processing - replace with your actual logic
+//	//for _, user := range Users {
+//	//	log.Printf("User: %s %s       (%s)",
+//	//		user.FirstName, user.LastName, user.PhoneNumber)
+//	//}
+//
+//	// Determine the maximum length for First Name + Last Name to ensure consistent spacing
+//	// You might want to adjust this based on your expected data
+//	const maxNameLength = 20 // Example: allocate 25 characters for first and last name combined
+//
+//	for _, user := range users {
+//		fullName := fmt.Sprintf("   %s %s", user.FirstName, user.LastName)
+//		log.Printf("%-*s  %s     %s", maxNameLength, fullName, user.PhoneNumber, user.ID)
+//	}
+//
+//	for _, user := range users {
+//		manager.Users[user.ID] = user
+//	}
+//
+//	// Signal that initial list is received (only once)
+//	if !manager.initialListReceived {
+//		manager.initialListReceived = true
+//		close(manager.initialUserList)
+//	}
+//
+//}
 
 func (manager *AppManager) WaitForInitialUserList(timeout time.Duration) error {
 	select {

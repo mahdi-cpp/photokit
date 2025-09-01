@@ -247,11 +247,15 @@ func (handler *AssetHandler) Delete(c *gin.Context) {
 
 func (handler *AssetHandler) Filters(c *gin.Context) {
 
+	fmt.Println(c.GetHeader("X-User-ID"))
+
 	userID, ok := helpers.GetUserID(c)
 	if !ok {
 		helpers.AbortWithUserIDInvalid(c)
 		return
 	}
+
+	fmt.Println("12: ", userID)
 
 	var with *phasset.SearchOptions
 	if err := c.ShouldBindJSON(&with); err != nil {

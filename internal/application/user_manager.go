@@ -5,12 +5,13 @@ import (
 	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
+	"os"
+	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/mahdi-cpp/api-go-pkg/collection_manager_uuid7"
+	"github.com/mahdi-cpp/photokit/internal/config"
 
-	"github.com/mahdi-cpp/photokit/config"
 	"github.com/mahdi-cpp/photokit/internal/collection_manager_v3"
 	asset "github.com/mahdi-cpp/photokit/internal/collections"
 	"github.com/mahdi-cpp/photokit/internal/collections/album"
@@ -56,38 +57,38 @@ type Collection struct {
 
 type UserManager struct {
 	mu                sync.RWMutex
-	user              account.User
+	userID            string
 	collection        *Collection
 	cameras           map[string]*asset.PHCollection[camera.Camera]
-	lastID            int
-	lastRebuild       time.Time
 	maintenanceCtx    context.Context
 	cancelMaintenance context.CancelFunc
 	statsMu           sync.Mutex
 }
 
-func NewUserManager(user *account.User) (*UserManager, error) {
+func NewUserManager(userID string) (*UserManager, error) {
 
 	// Handler context for background workers
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Ensure user directories exist
-	//userDirs := []string{userAssetDir, userMetadataDir, userThumbnailsDir}
-	//for _, dir := range userDirs {
-	//	if err := os.MkdirAll(dir, 0755); err != nil {
-	//		return nil, fmt.Errorf("failed to thumbnail user directory %s: %w", dir, err)
-	//	}
-	//}
-
 	userManager := &UserManager{
-		user:              *user,
+		userID:            userID,
 		collection:        &Collection{},
 		maintenanceCtx:    ctx,
 		cancelMaintenance: cancel,
 	}
 
+	// Ensure user directories exist
+	userDirectory := filepath.Join(config.GetUserPath(userID))
+	userMetadata := filepath.Join(userDirectory, "metadata")
+	userDirs := []string{userDirectory, userMetadata}
+	for _, dir := range userDirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create user directory %s: %w", dir, err)
+		}
+	}
+
 	var err error
-	userManager.collection.Assets, err = collection_manager_v3.NewCollectionManager[*phasset.PHAsset](config.GetUserMetadataPath(user.ID, "assets"), true)
+	userManager.collection.Assets, err = collection_manager_v3.NewCollectionManager[*phasset.PHAsset](config.GetUserMetadataPath(userID, "assets"), true)
 	if err != nil {
 		panic(err)
 	}
@@ -98,12 +99,12 @@ func NewUserManager(user *account.User) (*UserManager, error) {
 	}
 	fmt.Println(len(all))
 
-	userManager.collection.Album = NewPhotoAssetCollection[*album.Album](config.GetUserMetadataPath(user.ID, "albums"))
-	userManager.collection.SharedAlbums = NewPhotoAssetCollection[*shared_album.SharedAlbum](config.GetUserMetadataPath(user.ID, "shared_albums"))
-	userManager.collection.Trips = NewPhotoAssetCollection[*trip.Trip](config.GetUserMetadataPath(user.ID, "trips"))
-	userManager.collection.Persons = NewPhotoAssetCollection[*person.Person](config.GetUserMetadataPath(user.ID, "persons"))
-	userManager.collection.Pinned = NewPhotoAssetCollection[*pinned.Pinned](config.GetUserMetadataPath(user.ID, "pins"))
-	userManager.collection.Villages = NewPhotoAssetCollection[*village.Village](config.GetUserMetadataPath(user.ID, "villages"))
+	userManager.collection.Album = NewPhotoAssetCollection[*album.Album](config.GetUserMetadataPath(userID, "albums"))
+	userManager.collection.SharedAlbums = NewPhotoAssetCollection[*shared_album.SharedAlbum](config.GetUserMetadataPath(userID, "shared_albums"))
+	userManager.collection.Trips = NewPhotoAssetCollection[*trip.Trip](config.GetUserMetadataPath(userID, "trips"))
+	userManager.collection.Persons = NewPhotoAssetCollection[*person.Person](config.GetUserMetadataPath(userID, "persons"))
+	userManager.collection.Pinned = NewPhotoAssetCollection[*pinned.Pinned](config.GetUserMetadataPath(userID, "pins"))
+	userManager.collection.Villages = NewPhotoAssetCollection[*village.Village](config.GetUserMetadataPath(userID, "villages"))
 
 	userManager.prepareAlbums()
 	userManager.prepareTrips()
@@ -157,7 +158,7 @@ func (m *UserManager) prepareAlbums() {
 	for _, item := range items {
 
 		with := &phasset.SearchOptions{
-			UserID:    mahdiUserID,
+			UserID:    m.userID,
 			Albums:    []string{item.ID},
 			SortBy:    "createdAt",
 			SortOrder: "start",
@@ -207,7 +208,7 @@ func (m *UserManager) preparePersons() {
 
 	for _, item := range items {
 		with := &phasset.SearchOptions{
-			UserID:    mahdiUserID,
+			UserID:    m.userID,
 			Persons:   []string{item.ID},
 			SortBy:    "createdAt",
 			SortOrder: "start",
@@ -264,7 +265,7 @@ func (m *UserManager) prepareCameras() {
 	for _, collection := range m.cameras {
 
 		with := &phasset.SearchOptions{
-			UserID:      mahdiUserID,
+			UserID:      m.userID,
 			CameraMake:  collection.Item.CameraMake,
 			CameraModel: collection.Item.CameraModel,
 			SortBy:      "createdAt",

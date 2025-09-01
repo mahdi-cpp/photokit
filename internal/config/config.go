@@ -17,8 +17,8 @@ func GetPath(file string) string {
 	return filepath.Join(root, application, file)
 }
 
-func GetUserPath(phone string, file string) string {
-	pp := filepath.Join(root, application, users, phone, file)
+func GetUserPath(userID string) string {
+	pp := filepath.Join(root, application, users, userID)
 	fmt.Println(pp)
 	return pp
 }

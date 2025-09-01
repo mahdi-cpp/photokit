@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var port = 50101
+var port = 50151
 
 // Declare 'router' at the package level, making it a global variable
 var router *gin.Engine

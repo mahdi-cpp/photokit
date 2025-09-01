@@ -3,9 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/mahdi-cpp/photokit/cmd/middelware"
+	main2 "github.com/mahdi-cpp/photokit/cmd"
 	"github.com/mahdi-cpp/photokit/internal/api/handler"
 	"github.com/mahdi-cpp/photokit/internal/application"
 )
@@ -18,10 +17,10 @@ func main() {
 	}
 
 	// Wait for initial user list with 10 second timeout
-	if err := applicationManager.WaitForInitialUserList(10 * time.Second); err != nil {
-		log.Printf("Warning: %v", err)
-		// You might choose to continue or exit based on your requirements
-	}
+	//if err := applicationManager.WaitForInitialUserList(10 * time.Second); err != nil {
+	//	log.Printf("Warning: %v", err)
+	//	// You might choose to continue or exit based on your requirements
+	//}
 
 	fmt.Println("execute after get users ---------------------------")
 
@@ -30,7 +29,7 @@ func main() {
 	//upgrade_v3.Start(applicationManager.AccountManager)
 	//}
 
-	ginInit()
+	main2.ginInit()
 
 	assetHandler := handler.NewAssetHandler(applicationManager)
 	assetRoute(assetHandler)
@@ -56,13 +55,12 @@ func main() {
 	cameraHandler := handler.NewCameraHandler(applicationManager)
 	cameraRoute(cameraHandler)
 
-	startServer(router)
+	main2.startServer(main2.router)
 }
 
 func assetRoute(h *handler.AssetHandler) {
 
-	api := router.Group("/api/v1/assets")
-	api.Use(middelware.AuthMiddleware())
+	api := main2.router.Group("/api/v1/assets")
 
 	api.POST("thumbnail", h.Create)
 	api.POST("upload", h.Upload)
@@ -75,7 +73,7 @@ func assetRoute(h *handler.AssetHandler) {
 
 func RegisterAlbumRoutes(h *handler.AlbumHandler) {
 
-	api := router.Group("/api/v1/album")
+	api := main2.router.Group("/api/v1/album")
 
 	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
@@ -86,7 +84,7 @@ func RegisterAlbumRoutes(h *handler.AlbumHandler) {
 
 func pinnedRoute(h *handler.PinnedHandler) {
 
-	api := router.Group("/api/v1/pinned")
+	api := main2.router.Group("/api/v1/pinned")
 
 	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
@@ -96,7 +94,7 @@ func pinnedRoute(h *handler.PinnedHandler) {
 
 func sharedAlbumRoute(h *handler.SharedAlbumHandler) {
 
-	api := router.Group("/api/v1/shared_album")
+	api := main2.router.Group("/api/v1/shared_album")
 
 	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
@@ -106,7 +104,7 @@ func sharedAlbumRoute(h *handler.SharedAlbumHandler) {
 
 func tripRoute(h *handler.TripHandler) {
 
-	api := router.Group("/api/v1/trip")
+	api := main2.router.Group("/api/v1/trip")
 
 	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
@@ -116,7 +114,7 @@ func tripRoute(h *handler.TripHandler) {
 
 func personRoute(h *handler.PersonHandler) {
 
-	api := router.Group("/api/v1/person")
+	api := main2.router.Group("/api/v1/person")
 
 	api.POST("thumbnail", h.Create)
 	api.POST("update", h.Update)
@@ -126,14 +124,14 @@ func personRoute(h *handler.PersonHandler) {
 
 func cameraRoute(h *handler.CameraHandler) {
 
-	api := router.Group("/api/v1/camera")
+	api := main2.router.Group("/api/v1/camera")
 
 	api.POST("/list", h.GetList)
 }
 
 func villageRoute(h *handler.VillageHandler) {
 
-	api := router.Group("/api/v1/village")
+	api := main2.router.Group("/api/v1/village")
 
 	api.POST("list", h.GetList)
 }
